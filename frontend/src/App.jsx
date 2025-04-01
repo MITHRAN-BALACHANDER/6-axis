@@ -1,13 +1,14 @@
 import React from 'react'
-import './App.css'
+import './styles/App.css'
 import Dashboard from './pages/Dashboard'
-import Navbar from './components/Navbar'
 
+import Header from './components/Header'
 function App() {
 
 
   return (
     <>
+    <Header/>
       <Dashboard/>
      
     </>
