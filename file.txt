@@ -1,0 +1,86 @@
+robotics-6axis-webapp/
+│
+├── backend/                           # Django Backend
+│   ├── robotics/                      # Django Project Root
+│   │   ├── settings.py                # Django settings
+│   │   ├── urls.py                    # Main URL router
+│   │   ├── wsgi.py                    # WSGI entry point
+│   │   ├── asgi.py                    # ASGI entry point (for WebSockets)
+│   │   ├── _init_.py                 
+│   │
+│   ├── motion_control/                 # Robot Motion Control
+│   │   ├── models.py                   # Database for motion profiles, robot state
+│   │   ├── views.py                    # Django API endpoints for motion
+│   │   ├── urls.py                     # API routes
+│   │   ├── serializers.py              # Django REST serializers
+│   │   ├── tasks.py                    # Celery tasks for async motion
+│   │   ├── ros_bridge.py               # Communicates with ROS (rospy/rosbridge)
+│   │   ├── motion_planner.py           # Path planning, IK, trajectory generation
+│   │   ├── collision_detection.py      # Safety checks for robot movement
+│   │   ├── _init_.py                 
+│   │
+│   ├── user_management/                 # Authentication & Roles
+│   │   ├── models.py                    # User roles, permissions
+│   │   ├── views.py                     # Login, API authentication
+│   │   ├── urls.py                      # User management routes
+│   │   ├── serializers.py               
+│   │   ├── _init_.py                  
+│   │
+│   ├── monitoring/                      # Real-time monitoring
+│   │   ├── views.py                     # System monitoring API
+│   │   ├── urls.py                      # Routes for monitoring endpoints
+│   │   ├── analytics.py                 # Motion analytics processing
+│   │   ├── logging.py                   # System logging
+│   │   ├── _init_.py                  
+│   │
+│   ├── reports/                         # Logs & Analytics
+│   │   ├── views.py                     # Generates reports
+│   │   ├── urls.py                      # API routes for reports
+│   │   ├── pdf_generator.py             # Converts logs to PDF
+│   │   ├── csv_export.py                # Exports data to CSV
+│   │   ├── _init_.py                  
+│   │
+│   ├── static/                          # CSS, JS, images
+│   ├── media/                           # Uploaded motion files (optional)
+│   ├── manage.py                        # Django CLI tool
+│
+│
+├── frontend/                            # React Frontend
+│   ├── public/                          # Static files (index.html)
+│   ├── src/                             # React app source
+│   │   ├── components/                  # UI Components
+│   │   │   ├── MotionControl.js         # Robot motion control UI
+│   │   │   ├── LiveStatus.js            # Real-time status display
+│   │   │   ├── UserAuth.js              # Login, authentication
+│   │   │   ├── Analytics.js             # Robot motion analytics UI
+│   │   │   ├── Reports.js               # PDF/CSV reports UI
+│   │   ├── pages/                       # Page Components
+│   │   │   ├── Dashboard.js             # Main Dashboard
+│   │   │   ├── MotionPage.js            # Motion Control Page
+│   │   │   ├── LogsPage.js              # Logs and Reports
+│   │   ├── services/                    # API calls (axios)
+│   │   │   ├── motionAPI.js             # Calls motion control API
+│   │   │   ├── authAPI.js               # Calls authentication API
+│   │   ├── context/                     # React Context for global state
+│   │   ├── utils/                       # Helper functions
+│   │   ├── App.js                       # Main entry point
+│   │   ├── index.js                     # ReactDOM render
+│   │   ├── routes.js                    # React Router setup
+│   │   ├── styles/                      # CSS, Tailwind, Styled Components
+│   ├── package.json                     # Dependencies
+│   ├── vite.config.js                    # Configuration for fast bundling
+│
+│
+├── ros_ws/                              # ROS Workspace (Robot Control)
+│   ├── src/                             # Source files for ROS nodes
+│   │   ├── motion_control_node/         # ROS package for motion control
+│   │   │   ├── scripts/                 # Python ROS scripts
+│   │   │   │   ├── motion_controller.py # ROS node for motion control
+│   │   │   │   ├── robot_status.py      # Publishes robot state
+│   │   │   │   ├── path_planner.py      # Implements trajectory planning
+│   │   │   │   ├── inverse_kinematics.py# Computes joint angles from end-effector pos
+│   │   │   ├── launch/                  # ROS launch files
+│   │   │   │   ├── start.launch         # Launch file to start ROS nodes
+│   │   │   ├── CMakeLists.txt           # ROS build config
+│   │   │   ├── package.xml              # ROS package definition
+│   │   │   ├── _init_.py
