@@ -1,57 +1,56 @@
 .header {
-    background-color: rgb(255, 255, 255);
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-bottom: 2px solid #fffefe;
-  }
-  
-  .header-container {
-    display: flex;
-    align-items: center;
-    width: 90%;
-    max-width: 1200px;
-    justify-content: space-between;
-  }
-  
-  .nba, .naac {
-    text-align: center;
-  }
-  
-  .nba-logo, .naac-logo {
-    height: 80px;
-    display: block;
-    margin: 0 auto 10px;
-  }
-  
-  .college-info {
-    text-align: center;
-    flex: 1;
-    padding: 0 20px;
-  }
-  
-  .college-logo {
-    height: 80px;
-    display: block;
-    margin: 0 auto 10px;
-  }
-  
-  h1 {
-    font-size: 24px;
-    color: #006400;
-    margin: 10px 0;
-  }
-  
-  p {
-    font-size: 14px;
-    color: #333;
-    margin: 5px 0;
-  }
-  
-  h2 {
-    font-size: 28px;
-    color: #006400;
-    margin: 5px 0;
-  }
-  
+  background-color: rgb(255, 255, 255);
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 2px solid #fffefe;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  width: 90%;
+  max-width: 1200px;
+  justify-content: space-between;
+}
+
+.nba, .naac {
+  text-align: center;
+}
+
+.nba-logo, .naac-logo {
+  height: 80px;
+  display: block;
+  margin: 0 auto 10px;
+}
+
+.college-info {
+  text-align: center;
+  flex: 1;
+  padding: 0 20px;
+}
+
+.college-logo {
+  height: 80px;
+  display: block;
+  margin: 0 auto 10px;
+}
+
+h1 {
+  font-size: 24px;
+  color: #006400;
+  margin: 10px 0;
+}
+
+p {
+  font-size: 14px;
+  color: #333;
+  margin: 5px 0;
+}
+
+h2 {
+  font-size: 28px;
+  color: #006400;
+  margin: 5px 0;
+}

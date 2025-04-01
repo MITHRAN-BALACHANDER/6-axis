@@ -11,7 +11,7 @@ return (
             </div>
             
             <div className="college-info">
-                <br/>
+               
                 <h1>SRI SHAKTHI INSTITUTE OF ENGINEERING AND TECHNOLOGY</h1>
              
                 <p style={{ fontWeight: "bold" }}>
