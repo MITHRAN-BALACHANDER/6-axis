@@ -7,7 +7,7 @@ return (
     <header className="header">
         <div className="header-container">
             <div className="nba">
-                <img src="/nba-logo.png" alt="NBA Accreditation" className="nba-logo" />
+                <img src="/image.png" alt="NBA Accreditation" className="nba-logo" />
             </div>
             
             <div className="college-info">
