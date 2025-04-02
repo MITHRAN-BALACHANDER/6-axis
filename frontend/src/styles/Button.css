@@ -1,0 +1,27 @@
+.button {
+    border-radius: 6px;
+    background-color: #048a38;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    transition: background-color 0.2s ease-in-out;
+    outline: none;
+    border: 10px;
+    
+  }
+  
+  .button:hover {
+    background-color: #00546d;
+  }
+  
+  .button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px #01723a;
+  }
+  
+  .button:disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  

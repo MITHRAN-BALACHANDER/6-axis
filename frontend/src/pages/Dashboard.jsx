@@ -1,10 +1,21 @@
 import React from 'react';
-
+import Button from '../components/Button';
+import Header from '../components/Header'
+import Navbar from '../components/Navbar'
 const Dashboard = () => {
     return (
         <div>
-            <h1>Dashboard</h1>
-            <p>Welcome to the Dashboard page!</p>
+             <Header/>
+             <Navbar />
+         
+            <Button buttonText="Start" />
+            <br />
+            <Button buttonText="Stop" />
+            <br />
+            <Button buttonText="Simulate" />
+            <br />  
+            <Button buttonText="Reset" />
+
         </div>
     );
 };
