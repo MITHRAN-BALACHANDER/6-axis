@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-//import './login.css';   
+import "../styles/login.css";
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -9,7 +9,7 @@ const Login = () => {
         e.preventDefault();
         if (email === 'admin@siet.ac.in' && password === 'admin') {
             console.log('Login successful');
-           // document.body.style.pointerEvents = "all";
+           document.body.style.pointerEvents = "all";
            // window.location.href = '/home'; 
             navigate('/dashboard');
            
