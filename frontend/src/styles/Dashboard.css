@@ -1,0 +1,30 @@
+
+.start-container .button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    width: 100%;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: left;
+    background-color: #ffffff;
+    min-height: 100vh;
+}
+
+.Start-container {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+   
+    gap: 15px;
+}
+.start-container .button:hover {
+    background-color: #0056b3;
+}
