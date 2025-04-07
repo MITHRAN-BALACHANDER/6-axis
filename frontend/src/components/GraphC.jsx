@@ -33,6 +33,11 @@ const GraphC = () => {
                 title: {
                     text: 'Velocity',
                     left: 'center',
+                }, 
+                 toolbox: {
+                    feature: {
+                      saveAsImage: {}
+                    }
                 },
                 xAxis: {
                     type: 'category',

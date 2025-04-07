@@ -14,6 +14,7 @@ import LogsPage from './pages/LogsPage';
 import Logout from './components/Logout';
 import PrivateRoute from './components/PrivateRoute';
 import Header from './components/Header';
+import Help from './pages/Help';
 
 
 function App() {
@@ -51,6 +52,14 @@ function App() {
           element={
             <PrivateRoute>
               <About />
+            </PrivateRoute>
+          }
+        />
+           <Route
+          path="/help"
+          element={
+            <PrivateRoute>
+              <Help />
             </PrivateRoute>
           }
         />

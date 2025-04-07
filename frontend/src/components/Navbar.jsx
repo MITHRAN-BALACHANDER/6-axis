@@ -6,7 +6,7 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="nav-links">
-        {["Dashboard", "Graph", "Settings", "About", "Contact", "Help", "Logout","Log"].map((item) => (
+        {["Dashboard", "Graph", "Settings", "About",  "Help", "Logout","Log"].map((item) => (
           <Link key={item} to={`/${item.toLowerCase()}/`} className="nav-item">
             {item}
           </Link>

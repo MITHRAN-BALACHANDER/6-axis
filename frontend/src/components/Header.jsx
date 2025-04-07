@@ -7,7 +7,7 @@ return (
     <header className="header">
         <div className="header-container">
             <div className="nba">
-                <img src="/image.png" alt="NBA Accreditation" className="nba-logo" />
+                <img src="/image.png   " alt="NBA Accreditation" className="nba-logo" />
             </div>
             
             <div className="college-info">
@@ -19,7 +19,7 @@ return (
                 </p>
             </div>
             
-            <img src="/naac-logo.jpeg" alt="NAAC Accreditation" className="naac-logo" />
+            <img src="/naac-logo.png" alt="NAAC Accreditation" className="naac-logo" />
         </div>
     </header>
 );
