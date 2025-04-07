@@ -1,0 +1,18 @@
+.graph-button-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.graph-button-container button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+   
+    color: white;
+    transition: background-color 0.3s ease;
+}
+

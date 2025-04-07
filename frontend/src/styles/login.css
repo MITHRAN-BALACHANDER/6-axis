@@ -22,6 +22,8 @@
     }
 }
 
+
+
 @keyframes labelSlide {
     from {
         transform: translateY(10px);

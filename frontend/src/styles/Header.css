@@ -1,10 +1,10 @@
 .header {
-  background-color: rgb(255, 255, 255);
+
   padding: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
-  border-bottom: 2px solid #fffefe;
+  border-bottom: 2px ;
 }
 
 .header-container {

@@ -4,3 +4,13 @@
   padding: 2rem;
  
 }
+
+body {
+
+  background: linear-gradient(to bottom, #f9f9f9, #ffffff);
+
+  height: 100vh;
+
+  margin: 0;
+
+}

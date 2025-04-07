@@ -10,7 +10,7 @@ const Login = () => {
         if (email === 'admin@siet.ac.in' && password === 'admin') {
             console.log('Login successful');
            document.body.style.pointerEvents = "all";
-           // window.location.href = '/home'; 
+        localStorage.setItem('isAuthenticated', 'true');
             navigate('/dashboard');
            
         } else {

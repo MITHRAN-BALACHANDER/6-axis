@@ -1,51 +1,105 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '../components/Header'
 import Navbar from '../components/Navbar'
+
 const Setting = () => {
+    const [robotSettings, setRobotSettings] = useState({
+        axis1: 0,
+        axis2: 0,
+        axis3: 0,
+        axis4: 0,
+        axis5: 0,
+        axis6: 0,
+        speed: 50,
+        acceleration: 50
+    });
+
+    const handleChange = (e) => {
+        setRobotSettings({
+            ...robotSettings,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        // Handle saving robot settings here
+        console.log('Robot settings:', robotSettings);
+    };
+
     return (
-        <div style={{ padding: '20px' }}>
-                     <Header/>
-                     <Navbar />
-            <h1>Settings</h1>
-            <form>
+        <div>
+            <Header/>
+            <Navbar/>
+            <h1>Robot Settings</h1>
+            <form onSubmit={handleSubmit}>
+                {/* Axis Controls */}
+                {[1, 2, 3, 4, 5, 6].map(axis => (
+                    <div key={axis} style={{ marginBottom: '15px' }}>
+                        <label htmlFor={`axis${axis}`} style={{ display: 'block', marginBottom: '5px' }}>
+                            Axis {axis} Position (degrees):
+                        </label>
+                        <input
+                            type="range"
+                            id={`axis${axis}`}
+                            name={`axis${axis}`}
+                            min="-180"
+                            max="180"
+                            value={robotSettings[`axis${axis}`]}
+                            onChange={handleChange}
+                            style={{ width: '100%' }}
+                        />
+                        <span>{robotSettings[`axis${axis}`]}°</span>
+                    </div>
+                ))}
+
+                {/* Speed Control */}
                 <div style={{ marginBottom: '15px' }}>
-                    <label htmlFor="username" style={{ display: 'block', marginBottom: '5px' }}>
-                        Username:
+                    <label htmlFor="speed" style={{ display: 'block', marginBottom: '5px' }}>
+                        Speed (%):
                     </label>
                     <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        placeholder="Enter your username"
-                        style={{ padding: '8px', width: '100%' }}
+                        type="range"
+                        id="speed"
+                        name="speed"
+                        min="0"
+                        max="100"
+                        value={robotSettings.speed}
+                        onChange={handleChange}
+                        style={{ width: '100%' }}
                     />
+                    <span>{robotSettings.speed}%</span>
                 </div>
+
+                {/* Acceleration Control */}
                 <div style={{ marginBottom: '15px' }}>
-                    <label htmlFor="email" style={{ display: 'block', marginBottom: '5px' }}>
-                        Email:
+                    <label htmlFor="acceleration" style={{ display: 'block', marginBottom: '5px' }}>
+                        Acceleration (%):
                     </label>
                     <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        placeholder="Enter your email"
-                        style={{ padding: '8px', width: '100%' }}
+                        type="range"
+                        id="acceleration"
+                        name="acceleration"
+                        min="0"
+                        max="100"
+                        value={robotSettings.acceleration}
+                        onChange={handleChange}
+                        style={{ width: '100%' }}
                     />
+                    <span>{robotSettings.acceleration}%</span>
                 </div>
-                <div style={{ marginBottom: '15px' }}>
-                    <label htmlFor="password" style={{ display: 'block', marginBottom: '5px' }}>
-                        Password:
-                    </label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        placeholder="Enter your password"
-                        style={{ padding: '8px', width: '100%' }}
-                    />
-                </div>
-                <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#007BFF', color: '#fff', border: 'none', borderRadius: '5px' }}>
-                    Save Changes
+
+                <button 
+                    type="submit" 
+                    style={{ 
+                        padding: '10px 20px', 
+                        backgroundColor: '#007BFF', 
+                        color: '#fff', 
+                        border: 'none', 
+                        borderRadius: '5px' 
+                    }}
+                >
+                    Apply Settings
                 </button>
             </form>
         </div>

@@ -6,8 +6,8 @@ export default function Button({buttonText}) {
   
     return (
         <button
-        class="button"
-    >
+        className="button"
+    >  
         {buttonText}
 
       </button>
