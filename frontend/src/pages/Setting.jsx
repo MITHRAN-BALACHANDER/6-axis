@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Header from '../components/Header'
 import Navbar from '../components/Navbar'
+import Button from '../components/Button';
 
 const Setting = () => {
     const [robotSettings, setRobotSettings] = useState({
@@ -89,7 +90,9 @@ const Setting = () => {
                     <span>{robotSettings.acceleration}%</span>
                 </div>
 
-                <button 
+                <Button buttonText="Apply Settings" onClick={handleSubmit} />
+                {/* Submit Button */}
+                {/* <button 
                     type="submit" 
                     style={{ 
                         padding: '10px 20px', 
@@ -100,7 +103,7 @@ const Setting = () => {
                     }}
                 >
                     Apply Settings
-                </button>
+                </button> */}
             </form>
         </div>
     );
