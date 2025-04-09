@@ -3,13 +3,18 @@ import Button from '../components/Button';
 import Header from '../components/Header'
 import Navbar from '../components/Navbar'
 import '../styles/Dashboard.css';
+import Robo from '../r3f/Robo';
 const Dashboard = () => {
     return (
-        <div >
-          
-             <Header/>
-             <Navbar />
-             <div className="dashboard-container">
+        <div>
+            <Header/>
+            <Navbar />
+            <div className="dashboard-container">
+                <div style={{ width: '50%', height: '100%' }}>
+                   
+                    <Robo />
+                    </div>
+               
          <div className='Start-container'>
             <Button buttonText="Start" />
             <br />
@@ -21,6 +26,7 @@ const Dashboard = () => {
             </div>
         </div>
         </div>
+       
     );
 };
 
