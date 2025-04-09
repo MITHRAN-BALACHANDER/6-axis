@@ -6,12 +6,18 @@ import { ErrorBoundary } from './ErrorBoundary';
 import * as THREE from 'three';
 
 // Add this CSS at the top of your file or in your CSS file
+const canvasStyle = {
+  width: '40vw',
+  height: '75vh',
+  position: 'absolute',
 
+  right: 0,
+};
 
 function Robo() {
   return (
     <ErrorBoundary>
-      <div>
+      <div style={canvasStyle}>
         <Canvas
           camera={{ position: [0, 2, 6], fov: 50 }} // Adjusted camera position
           gl={{
