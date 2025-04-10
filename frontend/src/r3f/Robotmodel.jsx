@@ -2,7 +2,7 @@ import { useGLTF, OrbitControls } from '@react-three/drei';
 import { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as dat from 'dat.gui';
-import '../styles/Datgui.css'
+import '../styles/Datgui.css';
 
 export default function RobotModel() {
   const { nodes, scene } = useGLTF('/Robot.glb');
@@ -10,16 +10,18 @@ export default function RobotModel() {
   const bonesRef = useRef({});
   const robotGroupRef = useRef();
 
-
   // Default control values
   const controls = useRef({
     positionX: 0,
-    positionY: 0,
-    positionZ: 0,
+    positionY: 0.2,
+    positionZ: 2.9,
+    rotationX: 0,
+    rotationY: 1,
+    rotationZ: 0,
     A1: 0,
     A2: 0,
     A3: 0,
-    A4:0,
+    A4: 0,
     A5: 0,
     A6: 0,
     Steering: 0,
@@ -44,23 +46,27 @@ export default function RobotModel() {
       console.error("Failed to load nodes from Robot.glb.");
       return null;
     }
-  
 
     const gui = new dat.GUI();
     gui.domElement.style.position = 'absolute';
-    gui.domElement.style.top = '150px';
+    gui.domElement.style.top = '300px';
     gui.domElement.style.left = '100px';
+    gui.close();
+    // // Position controls
+    // gui.add(controls.current, 'positionX', -5, 5).name('Move X');
+    // gui.add(controls.current, 'positionY', -5, 5).name('Move Y');
+    // gui.add(controls.current, 'positionZ', -5, 5).name('Move Z');
 
-    // Position controls
-    gui.add(controls.current, 'positionX', -5, 5).name('Move X');
-    gui.add(controls.current, 'positionY', -5, 5).name('Move Y');
-    gui.add(controls.current, 'positionZ', -5, 5).name('Move Z');
+    // Rotation controls
+    // gui.add(controls.current, 'rotationX', -Math.PI, Math.PI).name('Rotate X');
+    // gui.add(controls.current, 'rotationY', -Math.PI, Math.PI).name('Rotate Y');
+    // gui.add(controls.current, 'rotationZ', -Math.PI, Math.PI).name('Rotate Z');
 
     // Joint controls
     gui.add(controls.current, 'A1', -Math.PI, Math.PI).name('Joint A1');
-    gui.add(controls.current, 'A2', -Math.PI / 2, Math.PI / 2).name('Joint A2');
+    gui.add(controls.current, 'A2', 0, Math.PI / 2).name('Joint A2');
     gui.add(controls.current, 'A3', -Math.PI / 2, Math.PI / 2).name('Joint A3');
-    gui.add(controls.current, 'A4', -Math.PI/2, Math.PI/2).name('Joint A4');
+    gui.add(controls.current, 'A4', -Math.PI / 2, Math.PI / 2).name('Joint A4');
     gui.add(controls.current, 'A5', -Math.PI / 2, Math.PI / 2).name('Joint A5');
 
     gui.add(controls.current, 'Steering', -Math.PI / 2, Math.PI / 2).name('Steering');
@@ -79,6 +85,7 @@ export default function RobotModel() {
     // Move the entire robot
     if (robotGroupRef.current) {
       robotGroupRef.current.position.set(c.positionX, c.positionY, c.positionZ);
+      robotGroupRef.current.rotation.set(c.rotationX, c.rotationY, c.rotationZ);
     }
 
     // Apply joint rotations (customize axes as needed)
@@ -100,7 +107,7 @@ export default function RobotModel() {
       <group ref={robotGroupRef}>
         <primitive object={scene} />
       </group>
-      <OrbitControls />
+      {/* <OrbitControls /> */}
       <ambientLight intensity={0.7} />
       <directionalLight position={[5, 5, 5]} intensity={1.2} />
     </>

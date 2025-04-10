@@ -26,8 +26,8 @@ function Robo() {
             outputEncoding: THREE.sRGBEncoding
           }}
         >
-          <color attach="background" args={['#202030']} />
-          <fog attach="fog" args={['#202030', 5, 20]} />
+          <color attach="background" args={['#ffffff']} />
+          {/* <fog attach="fog" args={['#ffffff', 5, 20]} /> */}
           <ambientLight intensity={0.2} />
           
           {/* 360-degree lighting setup */}
@@ -47,7 +47,7 @@ function Robo() {
           <pointLight 
             position={[-5, -5, -5]} 
             intensity={0.5}
-            color="#ff7d46"
+            color="#ffffff"
           />
           <spotLight 
             position={[10, 10, 10]}
@@ -57,20 +57,20 @@ function Robo() {
             castShadow
           />
           <RobotModel />
-          <OrbitControls 
+          {/* <OrbitControls 
             enableDamping
             dampingFactor={0.05}
             minDistance={3}
             maxDistance={15}
-          />
-          <mesh 
+          /> */}
+          {/* <mesh 
             rotation={[-Math.PI / 2, 0, 0]}
             position={[0, -1, 0]}
             receiveShadow
           >
             <planeGeometry args={[100, 100]} />
-            <meshStandardMaterial color="#202020" roughness={0.8} metalness={0.2} />
-          </mesh>
+            {/* <meshStandardMaterial color="#ffffff" /> */}
+          {/* </mesh>  */}
         </Canvas>
       </div>
     </ErrorBoundary>

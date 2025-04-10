@@ -9,6 +9,7 @@ const Dashboard = () => {
         <div>
             <Header/>
             <Navbar />
+            
             <div className="dashboard-container">
                 <div style={{ width: '50%', height: '100%' }}>
                    
@@ -16,6 +17,8 @@ const Dashboard = () => {
                     </div>
                
          <div className='Start-container'>
+            <br />
+            <br />  
             <Button buttonText="Start" />
             <br />
             <Button buttonText="Stop" />
