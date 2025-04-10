@@ -1,15 +1,14 @@
 "use client"
 import"../styles/Button.css"
 
-export default function Button({buttonText}) {
-
-  
+const Button = ({ buttonText, onClick }) => {
     return (
-        <button
-        className="button"
-    >  
-        {buttonText}
+        <button onClick={onClick}
+        className="button">
+          
+            {buttonText}
+        </button>
+    );
+};
 
-      </button>
-    )
-  }
+export default Button;

@@ -1,7 +1,5 @@
-from django.urls import path
-from .views import log_button_click, get_logs
+# monitoring/urls.py
 
-urlpatterns = [
-    path("logs/", log_button_click, name="log_button_click"),
-    path("logs/get/", get_logs, name="get_logs"),
-]
+from django.urls import path
+
+urlpatterns = []  # Keep this even if it's empty!
