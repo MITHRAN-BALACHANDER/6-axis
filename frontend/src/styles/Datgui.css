@@ -1,0 +1,36 @@
+/* Style for dat.GUI */
+.dg {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    background-color: #048a38;
+}
+
+.dg.ac {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+
+
+.dg .cr {
+    color: #ffffff;
+}
+
+.dg .cr.number {
+    background: #39b249;
+    border: 1px solid #ffffff;
+   /* Changed slider color */
+    border-radius: 3px;
+}
+
+  .dg .slider-fg {
+    background-color: #048a38!important; /* Your custom green */
+    /* border-radius: 10px; */
+  }
+  
+  /* Slider thumb (the handle) */
+  .dg .slider:hover .slider-fg {
+    background-color: #048a38 !important; /* Brighter green on hover */
+  }

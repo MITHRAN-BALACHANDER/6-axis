@@ -2,6 +2,7 @@ import { useGLTF, OrbitControls } from '@react-three/drei';
 import { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as dat from 'dat.gui';
+import '../styles/Datgui.css'
 
 export default function RobotModel() {
   const { nodes, scene } = useGLTF('/Robot.glb');
@@ -46,6 +47,9 @@ export default function RobotModel() {
   
 
     const gui = new dat.GUI();
+    gui.domElement.style.position = 'absolute';
+    gui.domElement.style.top = '150px';
+    gui.domElement.style.left = '100px';
 
     // Position controls
     gui.add(controls.current, 'positionX', -5, 5).name('Move X');
