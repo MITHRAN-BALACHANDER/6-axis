@@ -17,13 +17,12 @@ export class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ color: 'red', padding: '1rem' }}>
-          <h2>Something broke in the 3D scene 🧨</h2>
+        <div className="text-red-700 bg-slate-50 rounded-2xl p-8 text-center m-4 shadow-lg">
+          <h2 className="text-xl font-semibold mb-2">Something broke in the 3D scene 🧨</h2>
           <p>Please check the console for more details.</p>
         </div>
       );
     }
-
     return this.props.children;
   }
 }

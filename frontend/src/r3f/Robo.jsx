@@ -7,7 +7,21 @@ import * as THREE from "three";
 export default function Robo({ guiContainerRef }) {
   return (
     <ErrorBoundary>
-      <div className="w-full h-full min-h-[520px] min-w-[320px]">
+      <div className="
+        w-full
+        max-w-full
+        h-full
+        min-h-[320px] 
+        sm:min-h-[400px] 
+        md:min-h-[520px]
+        rounded-2xl
+        overflow-hidden
+        flex
+        items-center
+        justify-center
+        bg-white
+        shadow-md
+      ">
         <Canvas
           camera={{ position: [0, 2, 6], fov: 45 }}
           gl={{
@@ -16,10 +30,11 @@ export default function Robo({ guiContainerRef }) {
             outputEncoding: THREE.sRGBEncoding,
           }}
           shadows
+          style={{ width: "100%", height: "100%" }} // Ensures fill
         >
           <color attach="background" args={["#ecf4fd"]} />
           <ambientLight intensity={0.35} />
-          {[0, 72, 144, 216, 288].map((angle) => (
+          {[0, 72, 144, 216, 288].map(angle => (
             <directionalLight
               key={angle}
               position={[
