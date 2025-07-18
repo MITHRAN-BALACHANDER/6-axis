@@ -16,8 +16,8 @@ const navItems = [
   { label: "Settings", to: "/settings/", icon: Settings },
   { label: "About", to: "/about/", icon: Info },
   { label: "Help", to: "/help/", icon: HelpCircle },
-  { label: "Logout", to: "/logout/", icon: LogOut },
-  { label: "Log", to: "/log/", icon: FileText },
+  { label: "Logs", to: "/log/", icon: FileText },
+  { label: "Logout", to: "/logout/", icon: LogOut }
 ];
 
 export default function Navbar() {
