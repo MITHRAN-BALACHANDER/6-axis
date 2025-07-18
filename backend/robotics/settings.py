@@ -42,10 +42,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'user_management',  # Your app name here
-    'reports',  # Your app name here
-    'motion_control',  # Your app name here
-    'monitoring',  # Your app name here
+    'user_management', #
+    'reports',  #
+    'motion_control',  # 
+    'monitoring',  # 
     'rest_framework',
     # 'channels',  # For WebSockets
 ]
