@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from "react";
 import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as dat from "dat.gui";
+import * as THREE from "three";
 
 // Default control values
 const defaultControls = {
@@ -20,6 +21,21 @@ const defaultControls = {
   rotationX: 0,
   rotationY: 0,
   rotationZ: 0,
+  roughness: 0.5,
+  metalness: 0.5,
+};
+
+// High-contrast colors for each major component (update keys to match your mesh names)
+const colorMap = {
+  A1_bone: "#FF0000",        // Bright Red
+  A2_bone: "#00FF00",        // Bright Green
+  A3_bone: "#0000FF",        // Bright Blue
+  A4_bone: "#FFFF00",        // Yellow
+  A5_bone: "#FF00FF",        // Magenta
+  A6_bone: "#00FFFF",        // Cyan
+  Steering_bone: "#FFA500",  // Orange
+  Gripper: "#800080",        // Purple
+  Gripper001: "#008000",     // Dark Green
 };
 
 export default function RobotModel({ guiContainerRef }) {
@@ -27,20 +43,68 @@ export default function RobotModel({ guiContainerRef }) {
   const bonesRef = useRef({});
   const robotGroupRef = useRef();
   const controls = useRef({ ...defaultControls });
-  const guiRef = useRef(null); // track GUI so we only create once
+  const guiRef = useRef(null);
 
   useEffect(() => {
     if (!guiContainerRef?.current) {
       console.warn("GUI container ref not available.");
       return;
     }
-
     if (!nodes || Object.keys(nodes).length === 0) {
       console.error("Robot GLTF model not loaded properly. nodes:", nodes);
       return;
     }
 
-    // Map your model's bones here
+    // 1. Log mesh names for diagnostics
+    scene.traverse((child) => {
+      if (child.isMesh) {
+        console.log("Found mesh:", child.name);
+      }
+    });
+
+    // 2. Try to apply color/material to each main node directly (if their names match your colorMap)
+    for (const [key, color] of Object.entries(colorMap)) {
+      if (nodes[key]) {
+        if (nodes[key].isMesh) {
+          nodes[key].material = new THREE.MeshStandardMaterial({
+            color,
+            roughness: controls.current.roughness,
+            metalness: controls.current.metalness,
+          });
+          nodes[key].castShadow = true;
+          nodes[key].receiveShadow = true;
+        } else if (nodes[key].traverse) {
+          nodes[key].traverse((child) => {
+            if (child.isMesh) {
+              child.material = new THREE.MeshStandardMaterial({
+                color,
+                roughness: controls.current.roughness,
+                metalness: controls.current.metalness,
+              });
+              child.castShadow = true;
+              child.receiveShadow = true;
+            }
+          });
+        }
+      }
+    }
+
+    // 3. As extra safety, override all meshes in scene with their color if present in colorMap (fallback)
+    scene.traverse((child) => {
+      if (child.isMesh) {
+        const customColor = colorMap[child.name];
+        if (customColor) {
+          child.material = new THREE.MeshStandardMaterial({
+            color: customColor,
+            roughness: controls.current.roughness,
+            metalness: controls.current.metalness,
+          });
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      }
+    });
+
     bonesRef.current = {
       A1_bone: nodes.A1_bone,
       A2_bone: nodes.A2_bone,
@@ -53,15 +117,13 @@ export default function RobotModel({ guiContainerRef }) {
       Gripper001: nodes.Gripper001,
     };
 
-    if (guiRef.current) return; // prevent duplicate GUI creation
+    if (guiRef.current) return;
 
-    const gui = new dat.GUI({ width: 250 });
+    const gui = new dat.GUI({ width: 280 });
     guiRef.current = gui;
-
     guiContainerRef.current.appendChild(gui.domElement);
     gui.domElement.style.position = "static";
 
-    // Add controls
     gui.add(controls.current, "A1", -Math.PI, Math.PI).name("Base (A1)");
     gui.add(controls.current, "A2", -Math.PI / 2, Math.PI / 2).name("Joint (A2)");
     gui.add(controls.current, "A3", -Math.PI / 2, Math.PI / 2).name("Joint (A3)");
@@ -78,6 +140,21 @@ export default function RobotModel({ guiContainerRef }) {
     gui.add(controls.current, "rotationY", -Math.PI, Math.PI).name("Rot Y");
     gui.add(controls.current, "rotationZ", -Math.PI, Math.PI).name("Rot Z");
 
+    gui.add(controls.current, "roughness", 0, 1).name("Roughness").onChange((value) => {
+      scene.traverse((child) => {
+        if (child.isMesh && child.material) {
+          child.material.roughness = value;
+        }
+      });
+    });
+    gui.add(controls.current, "metalness", 0, 1).name("Metalness").onChange((value) => {
+      scene.traverse((child) => {
+        if (child.isMesh && child.material) {
+          child.material.metalness = value;
+        }
+      });
+    });
+
     // Cleanup function
     return () => {
       try {
@@ -89,18 +166,15 @@ export default function RobotModel({ guiContainerRef }) {
         console.warn("GUI cleanup failed:", e);
       }
     };
-  }, [nodes, guiContainerRef]);
+  }, [nodes, guiContainerRef, scene]);
 
-  // Animation Frame Loop
   useFrame(() => {
     const c = controls.current;
     const b = bonesRef.current;
-
     if (robotGroupRef.current) {
       robotGroupRef.current.position.set(c.positionX, c.positionY, c.positionZ);
       robotGroupRef.current.rotation.set(c.rotationX, c.rotationY, c.rotationZ);
     }
-
     if (b.A1_bone) b.A1_bone.rotation.y = c.A1;
     if (b.A2_bone) b.A2_bone.rotation.z = c.A2;
     if (b.A3_bone) b.A3_bone.rotation.z = c.A3;

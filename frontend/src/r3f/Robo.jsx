@@ -32,7 +32,7 @@ export default function Robo({ guiContainerRef }) {
           shadows
           style={{ width: "100%", height: "100%" }} // Ensures fill
         >
-          <color attach="background" args={["#ecf4fd"]} />
+          <color attach="background" args={["#ffffff"]} />
           <ambientLight intensity={0.35} />
           {[0, 72, 144, 216, 288].map(angle => (
             <directionalLight
