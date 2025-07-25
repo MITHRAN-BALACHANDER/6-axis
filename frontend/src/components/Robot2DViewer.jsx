@@ -1,91 +1,97 @@
 import React, { useMemo } from "react";
 
-// These values can be adjusted to better match your robot's proportions.
-const LINK_LENGTHS = { link2: 60, link3: 50, link5: 40 };
+const LINK_LENGTHS = { link2: 90, link3: 75, link4: 45, link5: 55, link6: 40 }; // Larger segments for bigger arm
+const LINK_COLORS = [
+  "#e74c3c", // link2
+  "#2ecc71", // link3
+  "#f9d342", // link4
+  "#3498db", // link5
+  "#a259fc"  // link6
+];
 
-// Colors are matched to the 3D model for consistency.
-const LINK_COLORS = {
-  link2: "#e74c3c", // Red
-  link3: "#2ecc71", // Green
-  link5: "#3498db", // Blue
-};
+function radToDeg(r) {
+  return (r * 180) / Math.PI;
+}
 
-const Robot2DViewer = ({ jointAngles }) => {
-  const linkPositions = useMemo(() => {
-    const positions = [];
-    const base = { x: 150, y: 280 }; // The anchor point for the 2D model.
+export default function Robot2DViewer({ jointAngles }) {
+  const { positions, jointSummary } = useMemo(() => {
+    const base = { x: 190, y: 330 }; // Moved down and right for larger SVG
+    const {
+      A1 = 0, A2 = 0, A3 = 0, A4 = 0, A5 = 0, A6 = 0,
+    } = jointAngles || {};
 
-    if (!jointAngles) return [];
+    const angles = [
+      A2 + Math.PI/2,
+      undefined, undefined, undefined, undefined
+    ];
+    angles[1] = angles[0] + A3;
+    angles[2] = angles[1] + A4;
+    angles[3] = angles[2] + A5;
+    angles[4] = angles[3] + A6;
 
-    // The angles from the sliders (in radians).
-    // A 90-degree offset (Math.PI / 2) is added to the first joint angle.
-    // This makes the arm start in an UPRIGHT position instead of flat.
-    const angle2 = (jointAngles.A2 || 0) + Math.PI / 2;
-    const angle3 = jointAngles.A3 || 0;
-    const angle5 = jointAngles.A5 || 0;
+    const pos = [base];
+    Object.values(LINK_LENGTHS).forEach((len, idx) => {
+      const last = pos[pos.length - 1];
+      const ang = angles[idx];
+      pos.push({
+        x: last.x + len * Math.cos(ang),
+        y: last.y - len * Math.sin(ang),
+      });
+    });
 
-    // Calculate the end point of the first link (from the base).
-    const p1 = {
-      x: base.x + LINK_LENGTHS.link2 * Math.cos(angle2),
-      y: base.y - LINK_LENGTHS.link2 * Math.sin(angle2),
-    };
+    const summary = [
+      { joint: "A1", deg: radToDeg(A1) },
+      { joint: "A2", deg: radToDeg(A2) },
+      { joint: "A3", deg: radToDeg(A3) },
+      { joint: "A4", deg: radToDeg(A4) },
+      { joint: "A5", deg: radToDeg(A5) },
+      { joint: "A6", deg: radToDeg(A6) },
+    ];
 
-    // The angle of the second link is added to the first to form a chain.
-    const cumulativeAngle2 = angle2 + angle3;
-    const p2 = {
-      x: p1.x + LINK_LENGTHS.link3 * Math.cos(cumulativeAngle2),
-      y: p1.y - LINK_LENGTHS.link3 * Math.sin(cumulativeAngle2),
-    };
-
-    // The third link's angle is added to the previous cumulative angle.
-    const cumulativeAngle3 = cumulativeAngle2 + angle5;
-    const p3 = {
-      x: p2.x + LINK_LENGTHS.link5 * Math.cos(cumulativeAngle3),
-      y: p2.y - LINK_LENGTHS.link5 * Math.sin(cumulativeAngle3),
-    };
-    
-    positions.push({ start: base, end: p1, color: LINK_COLORS.link2 });
-    positions.push({ start: p1, end: p2, color: LINK_COLORS.link3 });
-    positions.push({ start: p2, end: p3, color: LINK_COLORS.link5 });
-
-    return positions;
+    return { positions: pos, jointSummary: summary };
   }, [jointAngles]);
 
   return (
-    <div className="flex flex-col h-full">
-      {/* <h4 className="text-md font-semibold mb-3 text-gray-700 text-center">2D Preview</h4> */}
-      <div className="flex-grow w-full">
-        <svg
-          width="100%"
-          height="50%"
-          viewBox="0 0 300 300"
-          // The background and border classes have been removed for a transparent look.
-        >
-          {/* Robot Base */}
-          <rect x="125" y="280" width="50" height="20" fill="#2c3e50" rx="4" />
-
-          {/* Render Links */}
-          {linkPositions.map((pos, index) => (
+    <div className="flex flex-col h-full w-full">
+      <h4 className="text-lg font-semibold mb-3 text-gray-700 text-center">
+        2D Robot Joint Diagram (Larger View)
+      </h4>
+      <div className="flex-grow w-full flex justify-center items-center">
+        <svg width={400} height={420} viewBox="0 0 400 420">
+          {/* Draw links */}
+          {positions.slice(0, -1).map((start, idx) => (
             <line
-              key={index}
-              x1={pos.start.x} y1={pos.start.y}
-              x2={pos.end.x} y2={pos.end.y}
-              stroke={pos.color}
-              strokeWidth="10" strokeLinecap="round"
+              key={idx}
+              x1={start.x} y1={start.y}
+              x2={positions[idx + 1].x} y2={positions[idx + 1].y}
+              stroke={LINK_COLORS[idx] || "#888"}
+              strokeWidth={18 - idx * 2}
+              strokeLinecap="round"
             />
           ))}
-
-          {/* Render Joints */}
-          {linkPositions.map((pos, index) => (
-            <circle key={`joint-${index}`} cx={pos.start.x} cy={pos.start.y} r="6" fill="white" stroke="#374151" strokeWidth="2" />
+          {/* Draw joints */}
+          {positions.map((pt, idx) => (
+            <circle
+              key={idx}
+              cx={pt.x} cy={pt.y}
+              r={idx === 0 ? 15 : 11}
+              fill="#fff"
+              stroke={idx === 0 ? "#34495e" : "#22223b"}
+              strokeWidth="2.5"
+            />
           ))}
-          {linkPositions.length > 0 && (
-            <circle key="end-effector" cx={linkPositions[linkPositions.length - 1].end.x} cy={linkPositions[linkPositions.length - 1].end.y} r="6" fill="white" stroke="#374151" strokeWidth="2" />
-          )}
         </svg>
+      </div>
+
+      {/* Degree/Angle Table Aligned at Bottom */}
+      <div className="pt-6 pb-2 flex flex-wrap justify-center items-center gap-7 border-t mt-2 bg-white">
+        {jointSummary.map(({ joint, deg }) => (
+          <div key={joint} className="flex flex-col items-center min-w-[64px]">
+            <span className="font-bold text-blue-800">{joint}</span>
+            <span className="font-mono text-base text-black">{deg.toFixed(1)}°</span>
+          </div>
+        ))}
       </div>
     </div>
   );
-};
-
-export default Robot2DViewer;
+}

@@ -1,7 +1,6 @@
 from django.urls import path
-from .views import run_motion_profile
-
+from .views import IK2DView
 
 urlpatterns = [
-    path('motion/<str:profile_type>/', run_motion_profile),
+    path('ik/', IK2DView.as_view(), name='ik-2d'),
 ]

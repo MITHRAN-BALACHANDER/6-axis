@@ -29,17 +29,13 @@ export default function Robo({ guiContainerRef, jointAngles, setJointAngles }) {
           <color attach="background" args={["#f0f0f0"]} />
           <ambientLight intensity={0.5} />
           <directionalLight position={[10, 10, 5]} intensity={1.5} castShadow />
-          
           <Suspense fallback={null}>
-            <group position={[0, 0, 0]}>
-              <RobotModel 
-                guiContainerRef={guiContainerRef}
-                jointAngles={jointAngles}
-                setJointAngles={setJointAngles}
-              />
-            </group>
+            <RobotModel 
+              guiContainerRef={guiContainerRef}
+              jointAngles={jointAngles}
+              setJointAngles={setJointAngles}
+            />
           </Suspense>
-
           <Grid {...gridConfig} />
           <OrbitControls makeDefault />
         </Canvas>
