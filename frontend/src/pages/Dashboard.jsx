@@ -7,7 +7,7 @@ import FullScreenToggleButton from "../components/FullScreenToggle";
 import Robot2DViewer from "../components/Robot2DViewer";
 import axios from "axios";
 
-const IK_API_URL = "http://localhost:8000/api/motion/ik/";
+const IK_API_URL = import.meta.env.VITE_API_URL + "/api/motion/ik/";
 const DEFAULT_LINK1 = 1.1;  // Update if your robot's link1 is different
 const DEFAULT_LINK2 = 1.1;  // Update if your robot's link2 is different
 
