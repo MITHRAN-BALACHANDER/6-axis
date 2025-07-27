@@ -64,7 +64,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://localhost:5173",
-    "https://your-frontend-app.onrender.com",  # Update this with your actual frontend URL
+    "https://six-axis-frontend.onrender.com",  # Your frontend URL
 ]
 
 ROOT_URLCONF = 'robotics.urls'

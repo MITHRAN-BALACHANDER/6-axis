@@ -22,7 +22,7 @@ services:
     env: static
     plan: free
     buildCommand: cd frontend && chmod +x build.sh && ./build.sh
-    staticPublishPath: ./frontend/dist
+    staticPublishPath: ./ frontend/dist
     envVars:
       - key: VITE_API_URL
         value: https://6-axis-backend.onrender.com 
