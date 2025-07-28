@@ -78,7 +78,7 @@ export default function RobotModel({ guiContainerRef, jointAngles, setJointAngle
         guiContainerRef.current.innerHTML = "";
       }
     };
-  }, [nodes, scene, guiContainerRef, jointAngles, setJointAngles]);
+  }, [nodes, scene, guiContainerRef, setJointAngles]);
 
   useFrame(() => {
     if (!nodes) return;
