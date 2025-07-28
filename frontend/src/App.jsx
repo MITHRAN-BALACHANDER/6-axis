@@ -72,7 +72,7 @@ function App() {
           }
         />
         <Route
-          path="/log"
+          path="/logs"
           element={
             <PrivateRoute>
               <LogsPage />
