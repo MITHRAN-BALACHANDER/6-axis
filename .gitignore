@@ -27,5 +27,5 @@ dist-ssr
 .vercel
 
 dist*
-venv
-/db.sqlite3
+venv/
+/backend/db.sqlite3
