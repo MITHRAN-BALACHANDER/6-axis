@@ -1,6 +1,6 @@
 6--axis Robot
 
-
+```
 robotics-6axis-webapp/
 │
 ├── backend/                           # Django Backend
@@ -87,6 +87,8 @@ robotics-6axis-webapp/
 │   │   │   ├── CMakeLists.txt           # ROS build config
 │   │   │   ├── package.xml              # ROS package definition
 │   │   │   ├── _init_.py
+
+```
 Basic Functionalities required
 
 Motion Start & Stop
