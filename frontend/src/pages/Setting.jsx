@@ -1,19 +1,44 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Navbar from "../components/Navbar";
 import Button from "../components/Button";
 
+// Define a key for localStorage
+const LOCAL_STORAGE_KEY = "robotSettings";
+
+// Define initial default values if nothing is in localStorage
+const DEFAULT_INITIAL_SETTINGS = {
+  axis1: 0,
+  axis2: 0,
+  axis3: 0,
+  axis4: 0,
+  axis5: 0,
+  axis6: 0,
+  speed: 50,
+  acceleration: 50,
+};
+
 const Setting = () => {
-  const [robotSettings, setRobotSettings] = useState({
-    axis1: 0,
-    axis2: 0,
-    axis3: 0,
-    axis4: 0,
-    axis5: 0,
-    axis6: 0,
-    speed: 50,
-    acceleration: 50,
+  // Initialize state from localStorage or use default values
+  const [robotSettings, setRobotSettings] = useState(() => {
+    try {
+      const storedSettings = localStorage.getItem(LOCAL_STORAGE_KEY);
+      // Parse JSON from localStorage; if it's null or parsing fails, use defaults
+      return storedSettings ? JSON.parse(storedSettings) : DEFAULT_INITIAL_SETTINGS;
+    } catch (error) {
+      console.error("Failed to load settings from localStorage:", error);
+      return DEFAULT_INITIAL_SETTINGS; // Fallback to default if there's an error
+    }
   });
+
+  // Use useEffect to save settings to localStorage whenever robotSettings changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(robotSettings));
+    } catch (error) {
+      console.error("Failed to save settings to localStorage:", error);
+    }
+  }, [robotSettings]); // Dependency array: run this effect whenever robotSettings changes
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,8 +50,9 @@ const Setting = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // You can add API POST/PUT call here to save settings
-    console.log("Robot settings submitted:", robotSettings);
+    // In a real application, you'd send these settings to your backend here.
+    // For now, it's already saved to localStorage via the useEffect.
+    console.log("Robot settings submitted (and saved to localStorage):", robotSettings);
     alert("Robot settings applied!");
   };
 
@@ -55,7 +81,7 @@ const Setting = () => {
                   name={`axis${axis}`}
                   min="-180"
                   max="180"
-                  value={robotSettings[`axis${axis}`]}
+                  value={robotSettings[`axis${axis}`]} 
                   onChange={handleChange}
                   className="w-full accent-green-600"
                 />
@@ -81,7 +107,7 @@ const Setting = () => {
                 name="speed"
                 min="0"
                 max="100"
-                value={robotSettings.speed}
+                value={robotSettings.speed} 
                 onChange={handleChange}
                 className="w-full accent-green-600"
               />
@@ -103,7 +129,7 @@ const Setting = () => {
                 name="acceleration"
                 min="0"
                 max="100"
-                value={robotSettings.acceleration}
+                value={robotSettings.acceleration} 
                 onChange={handleChange}
                 className="w-full accent-green-600"
               />

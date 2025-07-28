@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 
-const LINK_LENGTHS = { link2: 90, link3: 75, link4: 45, link5: 55, link6: 40 }; // Larger segments for bigger arm
+const LINK_LENGTHS = { link2: 90, link3: 75, link4: 45, link5: 55, link6: 40 }; 
 const LINK_COLORS = [
   "#e74c3c", // link2
   "#2ecc71", // link3
@@ -14,22 +14,31 @@ function radToDeg(r) {
 }
 
 export default function Robot2DViewer({ jointAngles }) {
-  const { positions, jointSummary } = useMemo(() => {
-    const base = { x: 190, y: 330 }; // Moved down and right for larger SVG
+  const { positions, jointSummary, base } = useMemo(() => { // Destructure 'base' here
+    const baseCoord = { x: 200, y: 330 }; // Define base coordinate inside useMemo
     const {
-      A1 = 0, A2 = 0, A3 = 0, A4 = 0, A5 = 0, A6 = 0,
+      A1 = 0, A2 = 0, A3 = 0, A4 = 0, A5 = 0, A6 = 0, // Keep all values from props
     } = jointAngles || {};
 
+    // --- Kinematic Calculation for 2D Diagram ---
+    // A4, A5, A6 are static in the 2D diagram geometry.
+    // Their actual values (A4, A5, A6) are still used for display in the summary.
+
+    // A2 and A3 contribute to bending
     const angles = [
-      A2 + Math.PI/2,
+      A2 + Math.PI / 2, // Shoulder (A2) + initial offset for upright arm
       undefined, undefined, undefined, undefined
     ];
-    angles[1] = angles[0] + A3;
-    angles[2] = angles[1] + A4;
-    angles[3] = angles[2] + A5;
-    angles[4] = angles[3] + A6;
+    angles[1] = angles[0] + A3; // Elbow (A3)
 
-    const pos = [base];
+    // For A4, A5, A6, their contributions to the bending angle are set to 0 here
+    // for the 2D diagram, effectively making them static in terms of bending.
+    angles[2] = angles[1];      // A4 (Wrist Roll) does not bend the arm in this 2D view
+    angles[3] = angles[2];      // A5 (Wrist Pitch) does not bend the arm in this 2D view
+    angles[4] = angles[3];      // A6 (Wrist Yaw) does not bend the arm in this 2D view
+
+
+    const pos = [baseCoord]; // Use baseCoord here
     Object.values(LINK_LENGTHS).forEach((len, idx) => {
       const last = pos[pos.length - 1];
       const ang = angles[idx];
@@ -39,6 +48,8 @@ export default function Robot2DViewer({ jointAngles }) {
       });
     });
 
+    // --- Joint Angle Summary for Display ---
+    // All actual joint angles from props (A1-A6) are used for the summary display
     const summary = [
       { joint: "A1", deg: radToDeg(A1) },
       { joint: "A2", deg: radToDeg(A2) },
@@ -48,16 +59,20 @@ export default function Robot2DViewer({ jointAngles }) {
       { joint: "A6", deg: radToDeg(A6) },
     ];
 
-    return { positions: pos, jointSummary: summary };
-  }, [jointAngles]);
+    return { positions: pos, jointSummary: summary, base: baseCoord }; // Return baseCoord as 'base'
+  }, [jointAngles]); // Recalculate if jointAngles change
 
   return (
     <div className="flex flex-col h-full w-full">
       <h4 className="text-lg font-semibold mb-3 text-gray-700 text-center">
-        2D Robot Joint Diagram (Larger View)
+        2D Robot Joint Diagram
       </h4>
       <div className="flex-grow w-full flex justify-center items-center">
+        {/* Adjusted SVG size for better fit in the panel */}
         <svg width={400} height={420} viewBox="0 0 400 420">
+          {/* Base of the robot arm */}
+          <rect x={base.x - 25} y={base.y} width="50" height="20" fill="#4B5563" rx="6" />
+
           {/* Draw links */}
           {positions.slice(0, -1).map((start, idx) => (
             <line
@@ -65,7 +80,7 @@ export default function Robot2DViewer({ jointAngles }) {
               x1={start.x} y1={start.y}
               x2={positions[idx + 1].x} y2={positions[idx + 1].y}
               stroke={LINK_COLORS[idx] || "#888"}
-              strokeWidth={18 - idx * 2}
+              strokeWidth={18 - idx * 2} // Varying thickness for visual appeal
               strokeLinecap="round"
             />
           ))}
@@ -74,7 +89,7 @@ export default function Robot2DViewer({ jointAngles }) {
             <circle
               key={idx}
               cx={pt.x} cy={pt.y}
-              r={idx === 0 ? 15 : 11}
+              r={idx === 0 ? 15 : 11} // Larger base joint
               fill="#fff"
               stroke={idx === 0 ? "#34495e" : "#22223b"}
               strokeWidth="2.5"
@@ -83,10 +98,11 @@ export default function Robot2DViewer({ jointAngles }) {
         </svg>
       </div>
 
-      {/* Degree/Angle Table Aligned at Bottom */}
-      <div className="pt-6 pb-2 flex flex-wrap justify-center items-center gap-7 border-t mt-2 bg-white">
+      {/* Degree Summary: single horizontal line, properly aligned within the panel */}
+      {/* Increased gap and used a fixed flex-basis to ensure a single line always */}
+      <div className="flex-shrink-0 pt-4 pb-2 flex flex-wrap justify-center items-center gap-x-6 gap-y-2 border-t mt-2 bg-white text-base">
         {jointSummary.map(({ joint, deg }) => (
-          <div key={joint} className="flex flex-col items-center min-w-[64px]">
+          <div key={joint} className="flex flex-col items-center flex-grow" style={{ flexBasis: '15%' }}> {/* Adjusted flexBasis */}
             <span className="font-bold text-blue-800">{joint}</span>
             <span className="font-mono text-base text-black">{deg.toFixed(1)}°</span>
           </div>
