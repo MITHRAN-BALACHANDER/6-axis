@@ -1,120 +1,126 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Header from '../components/Header';
 import Navbar from '../components/Navbar';
-import Button from '../components/Button';
-
-// Example mixed logs: staff & students, logins, logouts, robot moves
-const logs = [
-  {
-    time: '2024-06-01 09:16:10',
-    event: 'Staff Login',
-    user: 'prof.1',
-    details: 'Staff logged in to admin dashboard.',
-  },
-  {
-    time: '2024-06-01 09:18:36',
-    event: 'Student Login',
-    user: 'student3',
-    details: 'Logged in from Lab-PC-3.',
-  },
-  {
-    time: '2024-06-01 09:21:12',
-    event: 'Move Robot',
-    user: 'student3',
-    details: 'Moved Axis 3 from -46° to +22°',
-  },
-  {
-    time: '2024-06-01 09:22:05',
-    event: 'Profile Start',
-    user: 'student2',
-    details: 'Started S-Curve profile.',
-  },
-  {
-    time: '2024-06-01 09:25:33',
-    event: 'Move Robot',
-    user: 'student1',
-    details: 'Moved Axis 1 from 0° to 31°',
-  },
-  {
-    time: '2024-06-01 09:45:45',
-    event: 'Staff Logout',
-    user: 'prof.1',
-    details: 'Logged out from Admin panel.',
-  },
-  {
-    time: '2024-06-01 09:48:18',
-    event: 'Robot Stop',
-    user: 'student1',
-    details: 'Emergency stop triggered.',
-  },
-  {
-    time: '2024-06-01 09:49:01',
-    event: 'Download Logs',
-    user: 'student2',
-    details: 'Logs downloaded as CSV.',
-  },
-  // ...add more as needed
-];
-
-// Function to generate CSV and trigger download
-function downloadLogs() {
-  const csvRows = [
-    ['Time', 'Event', 'User', 'Details'],
-    ...logs.map(log =>
-      [log.time, log.event, log.user, log.details].map(field => `"${field}"`).join(',')
-    ),
-  ].join('\n');
-
-  const blob = new Blob([csvRows], { type: 'text/csv' });
-  const url = window.URL.createObjectURL(blob);
-
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'robot_activity_logs.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
 
 const LogsPage = () => {
+  const [movementLogs, setMovementLogs] = useState([]);
+  const [systemLogs, setSystemLogs] = useState('');
+
+  useEffect(() => {
+    const fetchMovementLogs = async () => {
+      try {
+        const response = await axios.get('/api/monitoring/logs/');
+        if (Array.isArray(response.data)) {
+          setMovementLogs(response.data);
+        } else {
+          setMovementLogs([]);
+        }
+      } catch (error) {
+        console.error('Error fetching movement logs:', error);
+        setMovementLogs([]);
+      }
+    };
+
+    const fetchSystemLogs = async () => {
+      try {
+        const response = await axios.get('/api/monitoring/system-events/');
+        if (Array.isArray(response.data)) {
+          setSystemLogs(response.data);
+        } else {
+          setSystemLogs([]);
+        }
+      } catch (error) {
+        console.error('Error fetching system events:', error);
+        setSystemLogs([]);
+      }
+    };
+
+    fetchMovementLogs();
+    fetchSystemLogs();
+
+    const interval = setInterval(() => {
+      fetchMovementLogs();
+      fetchSystemLogs();
+    }, 5000); // Refresh every 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-50 flex flex-col">
+    <div className="h-screen overflow-auto bg-gray-100">
       <Header />
       <Navbar />
-      <main className="flex-1 flex flex-col items-center px-2 py-8">
-        <section className="w-full max-w-4xl bg-white shadow-lg rounded-2xl p-6 sm:p-10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-3">
-            <h1 className="text-2xl font-bold text-green-800">Robot & Staff Activity Logs</h1>
-            <Button buttonText="Download Logs" onClick={downloadLogs} />
-          </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border border-slate-200 rounded-lg">
-              <thead className="bg-slate-100">
+      <main className="p-6 flex flex-col gap-6">
+        {/* Movement Logs Section */}
+        <div className="container mx-auto bg-white rounded-2xl shadow-lg p-6">
+          <h2 className="text-xl font-bold mb-4">Robot Movement Logs</h2>
+          <div className="overflow-y-auto max-h-96">
+            <table className="min-w-full bg-white">
+              <thead>
                 <tr>
-                  <th className="px-4 py-2 text-left text-gray-700 font-semibold">Time</th>
-                  <th className="px-4 py-2 text-left text-gray-700 font-semibold">Event</th>
-                  <th className="px-4 py-2 text-left text-gray-700 font-semibold">User</th>
-                  <th className="px-4 py-2 text-left text-gray-700 font-semibold">Details</th>
+                  <th className="py-2 px-4 border-b">Timestamp</th>
+                  <th className="py-2 px-4 border-b">J1</th>
+                  <th className="py-2 px-4 border-b">J2</th>
+                  <th className="py-2 px-4 border-b">J3</th>
+                  <th className="py-2 px-4 border-b">J4</th>
+                  <th className="py-2 px-4 border-b">J5</th>
+                  <th className="py-2 px-4 border-b">J6</th>
                 </tr>
               </thead>
               <tbody>
-                {logs.map((log, i) => (
-                  <tr key={i} className={i % 2 === 0 ? 'bg-slate-50' : 'bg-white'}>
-                    <td className="px-4 py-2">{log.time}</td>
-                    <td className="px-4 py-2">{log.event}</td>
-                    <td className="px-4 py-2">{log.user}</td>
-                    <td className="px-4 py-2">{log.details}</td>
+                {movementLogs.length > 0 ? (
+                  movementLogs.map((log) => (
+                    <tr key={log.id}>
+                      <td className="py-2 px-4 border-b">{new Date(log.timestamp).toLocaleString()}</td>
+                      <td className="py-2 px-4 border-b">{log.joint1.toFixed(2)}</td>
+                      <td className="py-2 px-4 border-b">{log.joint2.toFixed(2)}</td>
+                      <td className="py-2 px-4 border-b">{log.joint3.toFixed(2)}</td>
+                      <td className="py-2 px-4 border-b">{log.joint4.toFixed(2)}</td>
+                      <td className="py-2 px-4 border-b">{log.joint5.toFixed(2)}</td>
+                      <td className="py-2 px-4 border-b">{log.joint6.toFixed(2)}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="7" className="text-center py-4">No movement logs found.</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
-          <div className="mt-6 text-sm text-gray-600">
-            <p>
-              <span className="font-semibold">Tip:</span> This log includes both staff logins and all robot movement/actions. Download for past  records.
-            </p>
+        </div>
+
+        {/* System Events Section */}
+        <div className="container mx-auto bg-white rounded-2xl shadow-lg p-6">
+          <h2 className="text-xl font-bold mb-4">System Events</h2>
+          <div className="overflow-y-auto max-h-96">
+            <table className="min-w-full bg-white">
+              <thead>
+                <tr>
+                  <th className="py-2 px-4 border-b">Timestamp</th>
+                  <th className="py-2 px-4 border-b">Event Type</th>
+                  <th className="py-2 px-4 border-b">Message</th>
+                </tr>
+              </thead>
+              <tbody>
+                {systemLogs.length > 0 ? (
+                  systemLogs.map((event) => (
+                    <tr key={event.id}>
+                      <td className="py-2 px-4 border-b">{new Date(event.timestamp).toLocaleString()}</td>
+                      <td className="py-2 px-4 border-b">{event.event_type}</td>
+                      <td className="py-2 px-4 border-b">{event.message}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="3" className="text-center py-4">No system events found.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
-        </section>
+        </div>
       </main>
     </div>
   );

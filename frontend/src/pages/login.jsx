@@ -1,25 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import "../styles/login.css";
-const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const navigate = useNavigate();
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (email === 'admin@siet.ac.in' && password === 'admin') {
-            console.log('Login successful');
-           document.body.style.pointerEvents = "all";
-        localStorage.setItem('isAuthenticated', 'true');
-            navigate('/dashboard');
-           
-        } else {
-            console.log('Invalid email or password');
-            document.body.style.pointerEvents = "none";
 
+const Login = () => {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const { login } = useAuth();
+    const navigate = useNavigate();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        try {
+            await login(username, password);
+            navigate('/dashboard');
+        } catch (err) {
+            setError('Invalid credentials. Please try again.');
         }
-        console.log('Email:', email);
-        console.log('Password:', password);
     };
 
     return (
@@ -27,13 +26,14 @@ const Login = () => {
         <div className="login-box">
             <h2>Login</h2>
             <form onSubmit={handleSubmit} >
+                {error && <p className="text-red-500">{error}</p>}
                 <div className="user-box">
-                    <label>Email:</label>
+                    <label>Username:</label>
                     <br />
                     <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
                         required
                     />
                 </div>
