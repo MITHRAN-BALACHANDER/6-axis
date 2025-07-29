@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Grid, OrbitControls } from "@react-three/drei";
-import RobotModel from "./Robotmodel";
+import RobotModel from "./RobotModel"; // Corrected casing: RobotModel
 import { ErrorBoundary } from "./ErrorBoundary";
 import * as THREE from "three";
 
@@ -23,7 +23,8 @@ export default function Robo({ guiContainerRef, jointAngles, setJointAngles }) {
           gl={{
             antialias: true,
             toneMapping: THREE.ACESFilmicToneMapping,
-            outputEncoding: THREE.sRGBEncoding,
+            // CORRECTED: Use outputColorSpace and SRGBColorSpace
+            outputColorSpace: THREE.SRGBColorSpace, 
           }}
         >
           <color attach="background" args={["#f0f0f0"]} />

@@ -1,28 +1,29 @@
 services:
-  # Backend Django API
   - type: web
     name: 6-axis-backend
     env: python
     plan: free
-    buildCommand: cd backend && chmod +x build.sh && ./build.sh
-    startCommand: cd backend && gunicorn robotics.wsgi:application --bind 0.0.0.0:$PORT
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn robotics.wsgi:application --bind 0.0.0.0:$PORT"
+    rootDir: backend/
     envVars:
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG
-        value: false
+        value: "False"
       - key: ALLOWED_HOSTS
-        value: localhost,127.0.0.1,.onrender.com
+        value: "localhost,127.0.0.1,6-axis-backend.onrender.com,6-axis-frontend.onrender.com"
       - key: CORS_ALLOWED_ORIGINS
-        value: https://6-axis-frontend.onrender.com
+        value: "https://6-axis-frontend.onrender.com"
 
-  # Frontend React App
-  - type: web
+  - type: static_site
     name: 6-axis-frontend
-    env: static
     plan: free
-    buildCommand: cd frontend && chmod +x build.sh && ./build.sh
-    staticPublishPath: ./ frontend/dist
+    buildCommand: "npm install --prefix ./frontend && npm run build --prefix ./frontend"
+    staticPublishPath: frontend/dist/
+    rewrites:
+      - source: /*
+        destination: /index.html
     envVars:
       - key: VITE_API_URL
-        value: https://6-axis-backend.onrender.com 
+        value: "https://6-axis-backend.onrender.com"
