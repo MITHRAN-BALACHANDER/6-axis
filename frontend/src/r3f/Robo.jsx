@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Grid, OrbitControls } from "@react-three/drei";
-import RobotModel from "./RobotModel"; // Corrected casing: RobotModel
+import RobotModel from "./Robotmodel"; // Corrected casing: RobotModel
 import { ErrorBoundary } from "./ErrorBoundary";
 import * as THREE from "three";
 
