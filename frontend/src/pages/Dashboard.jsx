@@ -5,6 +5,7 @@ import Button from "../components/Button";
 import Robo from "../r3f/Robo";
 import FullScreenToggleButton from "../components/FullScreenToggle";
 import Robot2DViewer from "../components/Robot2DViewer";
+import AngleDisplay from "../components/AngleDisplay";
 import axios from "axios";
 
 // Define a key for localStorage (must match the one in Setting.jsx)
@@ -173,14 +174,16 @@ const Dashboard = () => {
           />
         </section>
 
-        {/* Debug Section: 2D Viewer (left half) and GUI (right half) */}
+        {/* Debug Section: 2D Viewer and Angle Display */}
         <aside className="w-full lg:w-[40%] bg-white rounded-2xl shadow-lg p-6 flex flex-col">
           <h3 className="text-lg font-semibold mb-4 text-gray-800">Debug Panel</h3>
           <div className="flex flex-row gap-6 w-full h-full">
-            <div className="w-1/2">
+            <div className="w-2/3">
               <Robot2DViewer jointAngles={jointAngles} />
             </div>
-            <div ref={guiContainerRef} className="w-1/2" />
+            <div className="w-1/3">
+              <AngleDisplay jointAngles={jointAngles} />
+            </div>
           </div>
         </aside>
 

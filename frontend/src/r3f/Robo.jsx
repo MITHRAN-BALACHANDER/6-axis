@@ -5,7 +5,7 @@ import RobotModel from "./Robotmodel"; // Corrected casing: RobotModel
 import { ErrorBoundary } from "./ErrorBoundary";
 import * as THREE from "three";
 
-export default function Robo({ guiContainerRef, jointAngles, setJointAngles }) {
+export default function Robo({ jointAngles, setJointAngles }) {
   const gridConfig = {
     cellSize: 0.5,
     cellColor: '#cccccc',
@@ -32,7 +32,6 @@ export default function Robo({ guiContainerRef, jointAngles, setJointAngles }) {
           <directionalLight position={[10, 10, 5]} intensity={1.5} castShadow />
           <Suspense fallback={null}>
             <RobotModel 
-              guiContainerRef={guiContainerRef}
               jointAngles={jointAngles}
               setJointAngles={setJointAngles}
             />

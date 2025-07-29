@@ -98,16 +98,6 @@ export default function Robot2DViewer({ jointAngles }) {
         </svg>
       </div>
 
-      {/* Degree Summary: single horizontal line, properly aligned within the panel */}
-      {/* Increased gap and used a fixed flex-basis to ensure a single line always */}
-      <div className="flex-shrink-0 pt-4 pb-2 flex flex-wrap justify-center items-center gap-x-6 gap-y-2 border-t mt-2 bg-white text-base">
-        {jointSummary.map(({ joint, deg }) => (
-          <div key={joint} className="flex flex-col items-center flex-grow" style={{ flexBasis: '15%' }}> {/* Adjusted flexBasis */}
-            <span className="font-bold text-blue-800">{joint}</span>
-            <span className="font-mono text-base text-black">{deg.toFixed(1)}°</span>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

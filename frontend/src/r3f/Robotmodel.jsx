@@ -1,7 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import GUI from 'lil-gui';
 import * as THREE from "three";
 
 const colorMap = {
@@ -15,14 +14,12 @@ const colorMap = {
   Gripper001: "#3498db",
 };
 
-export default function RobotModel({ guiContainerRef, jointAngles, setJointAngles }) {
+export default function RobotModel({ jointAngles }) {
   const { nodes, scene } = useGLTF("/Robot.glb");
   const robotGroupRef = useRef();
-  const guiRef = useRef(null);
 
   useEffect(() => {
-    if (!guiContainerRef?.current || !nodes) return;
-    if (guiRef.current) return;
+    if (!nodes) return;
 
     scene.traverse((child) => {
       if (child.isMesh) {
@@ -39,46 +36,7 @@ export default function RobotModel({ guiContainerRef, jointAngles, setJointAngle
         child.receiveShadow = true;
       }
     });
-
-    const gui = new GUI({ container: guiContainerRef.current });
-    guiRef.current = gui;
-
-    const updateState = (key, value) => setJointAngles(prev => ({ ...prev, [key]: value }));
-
-    gui.add(jointAngles, "A1", -Math.PI, Math.PI).name("Base (A1)").onChange(val => updateState('A1', val));
-    gui.add(jointAngles, "A2", -Math.PI / 2, Math.PI / 2).name("Joint (A2)").onChange(val => updateState('A2', val));
-    gui.add(jointAngles, "A3", -Math.PI / 2, Math.PI / 2).name("Joint (A3)").onChange(val => updateState('A3', val));
-    gui.add(jointAngles, "A4", -Math.PI, Math.PI).name("Joint (A4)").onChange(val => updateState('A4', val));
-    gui.add(jointAngles, "A5", -Math.PI / 2, Math.PI / 2).name("Joint (A5)").onChange(val => updateState('A5', val));
-    gui.add(jointAngles, "A6", -Math.PI, Math.PI).name("Joint (A6)").onChange(val => updateState('A6', val));
-    
-    gui.add(jointAngles, "Gripper", 0, 1).name("Gripper").onChange(val => updateState('Gripper', val));
-    
-    const positionFolder = gui.addFolder('Position');
-    positionFolder.add(jointAngles, "positionX", -5, 5).name("Pos X").onChange(val => updateState('positionX', val));
-    positionFolder.add(jointAngles, "positionY", -5, 5).name("Pos Y").onChange(val => updateState('positionY', val));
-    positionFolder.add(jointAngles, "positionZ", -5, 5).name("Pos Z").onChange(val => updateState('positionZ', val));
-
-    const materialFolder = gui.addFolder('Appearance');
-    materialFolder.add(jointAngles, "roughness", 0, 1).name("Roughness").onChange((value) => {
-        updateState('roughness', value);
-        scene.traverse(child => child.isMesh && child.material && (child.material.roughness = value));
-    });
-    materialFolder.add(jointAngles, "metalness", 0, 1).name("Metalness").onChange((value) => {
-        updateState('metalness', value);
-        scene.traverse(child => child.isMesh && child.material && (child.material.metalness = value));
-    });
-
-    return () => {
-      if (guiRef.current) {
-        guiRef.current.destroy();
-        guiRef.current = null;
-      }
-      if (guiContainerRef.current) {
-        guiContainerRef.current.innerHTML = "";
-      }
-    };
-  }, [nodes, scene, guiContainerRef, setJointAngles]);
+  }, [nodes, scene, jointAngles.roughness, jointAngles.metalness]);
 
   useFrame(() => {
     if (!nodes) return;
