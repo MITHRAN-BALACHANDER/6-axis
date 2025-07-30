@@ -68,8 +68,7 @@ export default function Robot2DViewer({ jointAngles }) {
         2D Robot Joint Diagram
       </h4>
       <div className="flex-grow w-full flex justify-center items-center">
-        {/* Adjusted SVG size for better fit in the panel */}
-        <svg width={400} height={420} viewBox="0 0 400 420">
+        <svg className="w-full h-full" viewBox="0 0 400 420">
           {/* Base of the robot arm */}
           <rect x={base.x - 25} y={base.y} width="50" height="20" fill="#4B5563" rx="6" />
 

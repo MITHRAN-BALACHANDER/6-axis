@@ -154,14 +154,14 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="h-screen overflow-auto bg-gray-100">
+    <div className="min-h-screen bg-gray-100">
       <Header />
       <Navbar />
-      <main className="flex flex-col lg:flex-row gap-6 p-6 max-w-screen-9xl w-full mx-auto lg:h-[calc(100vh-160px)]">
+      <main className="flex flex-col lg:flex-row gap-6 p-4 sm:p-6 max-w-screen-2xl w-full mx-auto pb-24">
         {/* 3D Robot Section */}
         <section
           ref={roboSectionRef}
-          className="relative w-full lg:w-[30%] bg-white rounded-3xl shadow-md flex items-center justify-center min-h-[500px]"
+          className="relative w-full lg:w-[30%] bg-white rounded-3xl shadow-md flex items-center justify-center min-h-[400px] sm:min-h-[500px]"
         >
           <FullScreenToggleButton
             targetRef={roboSectionRef}
@@ -175,20 +175,20 @@ const Dashboard = () => {
         </section>
 
         {/* Debug Section: 2D Viewer and Angle Display */}
-        <aside className="w-full lg:w-[40%] bg-white rounded-2xl shadow-lg p-6 flex flex-col">
+        <aside className="w-full lg:w-[40%] bg-white rounded-2xl shadow-lg p-4 sm:p-6 flex flex-col">
           <h3 className="text-lg font-semibold mb-4 text-gray-800">Debug Panel</h3>
-          <div className="flex flex-row gap-6 w-full h-full">
-            <div className="w-2/3">
+          <div className="flex flex-col sm:flex-row gap-6 w-full h-full">
+            <div className="w-full sm:w-2/3">
               <Robot2DViewer jointAngles={jointAngles} />
             </div>
-            <div className="w-1/3">
+            <div className="w-full sm:w-1/3">
               <AngleDisplay jointAngles={jointAngles} />
             </div>
           </div>
         </aside>
 
         {/* Controls Section: X/Y fields at top, Buttons at bottom */}
-        <aside className="w-full lg:w-[30%] flex flex-col gap-5 bg-white rounded-2xl shadow-lg p-6">
+        <aside className="w-full lg:w-[30%] flex flex-col gap-5 bg-white rounded-2xl shadow-lg p-4 sm:p-6">
           <h3 className="text-lg font-semibold mb-2 text-gray-800">Controls</h3>
 
           {/* X/Y input fields at the TOP */}
