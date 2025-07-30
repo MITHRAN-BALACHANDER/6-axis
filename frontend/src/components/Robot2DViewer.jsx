@@ -15,7 +15,7 @@ function radToDeg(r) {
 
 export default function Robot2DViewer({ jointAngles }) {
   const { positions, jointSummary, base } = useMemo(() => { // Destructure 'base' here
-    const baseCoord = { x: 200, y: 330 }; // Define base coordinate inside useMemo
+    const baseCoord = { x: 280, y: 330 }; // Define base coordinate inside useMemo
     const {
       A1 = 0, A2 = 0, A3 = 0, A4 = 0, A5 = 0, A6 = 0, // Keep all values from props
     } = jointAngles || {};

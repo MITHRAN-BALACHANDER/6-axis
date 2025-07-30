@@ -5,14 +5,14 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 // import Contact from './pages/Contact';
 import NotFound from './pages/Notfound';
 import Dashboard from './pages/Dashboard';
-import LogsPage2 from './pages/LogsPage2';
+import LogsPage from './pages/LogsPage';
 
 const AppRoutes = () => {
     return (
         <Router>
             <Routes>
                 <Route path="/" element={<Dashboard />} />
-                <Route path="/logs" element={<LogsPage2 />} />
+                <Route path="/logs" element={<LogsPage />} />
                 {/* <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} /> */}
                 <Route path="*" element={<NotFound />} />
