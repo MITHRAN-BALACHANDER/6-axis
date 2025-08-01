@@ -81,11 +81,7 @@ const LogsPage = () => {
               required
               disabled={isVerifying}
             />
-<<<<<<< Updated upstream
-            <button type="submit" className="bg-green-800 text-white p-2 rounded" disabled={isVerifying}>
-=======
             <button type="submit" className="bg-blue-500 text-white p-2 rounded" disabled={isVerifying}>
->>>>>>> Stashed changes
               {isVerifying ? 'Verifying...' : 'Unlock'}
             </button>
           </div>
@@ -132,41 +128,6 @@ const LogsPage = () => {
                   ) : (
                     <tr>
                       <td colSpan="7" className="text-center py-4">No movement logs found.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </div>
-        
-      {/* Feedback Section */}
-        <div className="container mx-auto bg-white rounded-2xl shadow-lg p-6">
-          <h2 className="text-xl font-bold mb-4">Feedback</h2>
-          <div className="overflow-y-auto max-h-96">
-            {loading ? (
-              <div className="text-center py-4">Loading...</div>
-            ) : (
-              <table className="min-w-full bg-white">
-                <thead>
-                  <tr>
-                    <th className="py-2 px-4 border-b">Timestamp</th>
-                    <th className="py-2 px-4 border-b">Type</th>
-                    <th className="py-2 px-4 border-b">Message</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {feedback.length > 0 ? (
-                    feedback.map((item) => (
-                      <tr key={item.id}>
-                        <td className="py-2 px-4 border-b">{new Date(item.timestamp).toLocaleString()}</td>
-                        <td className="py-2 px-4 border-b">{item.type}</td>
-                        <td className="py-2 px-4 border-b">{item.message}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="3" className="text-center py-4">No feedback found.</td>
                     </tr>
                   )}
                 </tbody>
