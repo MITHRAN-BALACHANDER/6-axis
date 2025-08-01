@@ -26,3 +26,16 @@ class SystemEvent(models.Model):
 
     def __str__(self):
         return f"{self.get_event_type_display()} at {self.timestamp}"
+
+class Feedback(models.Model):
+    FEEDBACK_TYPE = [
+        ('HARDWARE', 'Hardware'),
+        ('SOFTWARE', 'Software'),
+    ]
+    
+    timestamp = models.DateTimeField(auto_now_add=True)
+    type = models.CharField(max_length=20, choices=FEEDBACK_TYPE)
+    message = models.TextField()
+
+    def __str__(self):
+        return f"{self.get_type_display()} at {self.timestamp}"
