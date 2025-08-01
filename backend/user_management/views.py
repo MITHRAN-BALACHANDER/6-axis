@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.models import User
 from monitoring.models import SystemEvent
+from django.conf import settings
 
 class RegisterView(APIView):
     def post(self, request):
@@ -46,3 +47,11 @@ class CheckAuthView(APIView):
             return Response({'isAuthenticated': True})
         else:
             return Response({'isAuthenticated': False}, status=status.HTTP_401_UNAUTHORIZED)
+
+class VerifyLogPasswordView(APIView):
+    def post(self, request):
+        password = request.data.get('password')
+        if password == settings.LOG_PASSWORD:
+            return Response({'success': True})
+        else:
+            return Response({'success': False}, status=status.HTTP_401_UNAUTHORIZED)
