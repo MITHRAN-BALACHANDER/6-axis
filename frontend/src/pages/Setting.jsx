@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Header from "../components/Header";
-import Navbar from "../components/Navbar";
 import Button from "../components/Button";
 
 // Define a key for localStorage
@@ -58,8 +56,6 @@ const Setting = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-50 flex flex-col">
-      <Header />
-      <Navbar />
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-8">
         <h1 className="text-3xl font-bold text-green-800 mb-8 text-center">
           Robot Settings

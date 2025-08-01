@@ -1,6 +1,4 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
-import Header from "../components/Header";
-import Navbar from "../components/Navbar";
 import Button from "../components/Button";
 import Robo from "../r3f/Robo";
 import FullScreenToggleButton from "../components/FullScreenToggle";
@@ -12,8 +10,9 @@ import axios from "axios";
 const LOCAL_STORAGE_KEY = "robotSettings";
 
 const IK_API_URL = "http://localhost:8000/api/motion/ik/";
-const DEFAULT_LINK1 = 1.1; // Update if your robot's link1 is different
-const DEFAULT_LINK2 = 1.1; // Update if your robot's link2 is different
+const L1 = 1.0;  // Base to shoulder
+const L2 = 1.0;  // Shoulder to elbow
+const L3 = 1.0;  // Elbow to wrist
 
 // Helper to convert degrees to radians
 function degToRad(d) {
@@ -60,8 +59,8 @@ const Dashboard = () => {
   });
 
 
-  // State for X/Y target fields
-  const [target, setTarget] = useState({ x: 1.4, y: 1.2 });
+  // State for X/Y/Z target fields and orientation
+  const [target, setTarget] = useState({ x: 1.4, y: 1.2, z: 0.5, roll: 0, pitch: 0, yaw: 0 });
   const [ikError, setIkError] = useState("");
 
 
@@ -70,23 +69,24 @@ const Dashboard = () => {
 
 
   // Send IK request to backend and update robot
-  const calculateAndMoveRobot = useCallback(async (currentX, currentY) => {
+  const calculateAndMoveRobot = useCallback(async (currentTarget) => {
     setIkError("");
     try {
       const response = await axios.post(IK_API_URL, {
-        x: currentX,
-        y: currentY,
-        length1: DEFAULT_LINK1,
-        length2: DEFAULT_LINK2,
+        ...currentTarget,
+        l1: L1,
+        l2: L2,
+        l3: L3,
+        l4: 0.5,
       });
       setJointAngles(prev => ({
         ...prev,
-        A1: degToRad(prev.axis1 || 0), // Use A1 from settings if it's considered fixed for IK moves
-        A2: (response.data.A2 * Math.PI) / 180,
-        A3: (response.data.A3 * Math.PI) / 180,
-        A4: degToRad(prev.axis4 || 0), // Use A4 from settings
-        A5: degToRad(prev.axis5 || 0), // Use A5 from settings
-        A6: degToRad(prev.axis6 || 0), // Use A6 from settings
+        A1: degToRad(response.data.A1),
+        A2: degToRad(response.data.A2),
+        A3: degToRad(response.data.A3),
+        A4: degToRad(response.data.A4),
+        A5: degToRad(response.data.A5),
+        A6: degToRad(response.data.A6),
         Gripper: 0,
       }));
     } catch (error) {
@@ -102,7 +102,7 @@ const Dashboard = () => {
     const newTarget = { ...target, [name]: parseFloat(value) || 0 };
     setTarget(newTarget);
     if (isMoving) {
-      calculateAndMoveRobot(newTarget.x, newTarget.y);
+      calculateAndMoveRobot(newTarget);
     }
   };
 
@@ -110,7 +110,7 @@ const Dashboard = () => {
   // --- Control Button Handlers ---
   const handleStart = () => {
     setIsMoving(true);
-    calculateAndMoveRobot(target.x, target.y);
+    calculateAndMoveRobot(target);
     setIkError("");
   };
 
@@ -145,7 +145,7 @@ const Dashboard = () => {
         }
         return INITIAL_DASHBOARD_ROBOT_POSE; // Fallback
     });
-    setTarget({ x: 1.4, y: 1.2 });
+    setTarget({ x: 1.4, y: 1.2, z: 0.5, roll: 0, pitch: 0, yaw: 0 });
     setIkError("Robot reset to default position.");
   };
 
@@ -155,8 +155,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Header />
-      <Navbar />
       <main className="flex flex-col lg:flex-row gap-6 p-4 sm:p-6 max-w-screen-2xl w-full mx-auto pb-24">
         {/* 3D Robot Section */}
         <section
@@ -191,7 +189,7 @@ const Dashboard = () => {
         <aside className="w-full lg:w-[30%] flex flex-col gap-5 bg-white rounded-2xl shadow-lg p-4 sm:p-6">
           <h3 className="text-lg font-semibold mb-2 text-gray-800">Controls</h3>
 
-          {/* X/Y input fields at the TOP */}
+          {/* X/Y/Z input fields at the TOP */}
           <div className="flex flex-col gap-3">
             <label className="font-medium text-gray-700 flex flex-col">
               Target X
@@ -211,6 +209,50 @@ const Dashboard = () => {
                 name="y"
                 step="0.01"
                 value={target.y}
+                onChange={handleInputChange}
+                className="mt-1 px-3 py-2 border rounded"
+              />
+            </label>
+            <label className="font-medium text-gray-700 flex flex-col">
+              Target Z
+              <input
+                type="number"
+                name="z"
+                step="0.01"
+                value={target.z}
+                onChange={handleInputChange}
+                className="mt-1 px-3 py-2 border rounded"
+              />
+            </label>
+            <label className="font-medium text-gray-700 flex flex-col">
+              Roll
+              <input
+                type="number"
+                name="roll"
+                step="0.1"
+                value={target.roll}
+                onChange={handleInputChange}
+                className="mt-1 px-3 py-2 border rounded"
+              />
+            </label>
+            <label className="font-medium text-gray-700 flex flex-col">
+              Pitch
+              <input
+                type="number"
+                name="pitch"
+                step="0.1"
+                value={target.pitch}
+                onChange={handleInputChange}
+                className="mt-1 px-3 py-2 border rounded"
+              />
+            </label>
+            <label className="font-medium text-gray-700 flex flex-col">
+              Yaw
+              <input
+                type="number"
+                name="yaw"
+                step="0.1"
+                value={target.yaw}
                 onChange={handleInputChange}
                 className="mt-1 px-3 py-2 border rounded"
               />
