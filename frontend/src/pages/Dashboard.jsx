@@ -3,6 +3,7 @@ import Header from "../components/Header";
 import Navbar from "../components/Navbar";
 import Button from "../components/Button";
 import Robo from "../r3f/Robo";
+<<<<<<< Updated upstream
 import FullScreenToggleButton from "../components/FullScreenToggle";
 import Robot2DViewer from "../components/Robot2DViewer";
 import AngleDisplay from "../components/AngleDisplay";
@@ -28,6 +29,9 @@ const INITIAL_DASHBOARD_ROBOT_POSE = {
   roughness: 0.5, metalness: 0.5,
 };
 
+=======
+import axios from "axios";
+>>>>>>> Stashed changes
 
 const Dashboard = () => {
   const guiContainerRef = useRef();
@@ -153,6 +157,17 @@ const Dashboard = () => {
     setIkError("Simulating robot path (functionality not yet implemented).");
   };
 
+  const handleSimulate = () => {
+    const coordinates = { x: 10, y: 20 }; // Example coordinates
+    axios.post('/api/move_robot/', coordinates)
+      .then(response => {
+        console.log('Robot move response:', response.data);
+      })
+      .catch(error => {
+        console.error('Error moving robot:', error);
+      });
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
@@ -190,6 +205,7 @@ const Dashboard = () => {
         {/* Controls Section: X/Y fields at top, Buttons at bottom */}
         <aside className="w-full lg:w-[30%] flex flex-col gap-5 bg-white rounded-2xl shadow-lg p-4 sm:p-6">
           <h3 className="text-lg font-semibold mb-2 text-gray-800">Controls</h3>
+<<<<<<< Updated upstream
 
           {/* X/Y input fields at the TOP */}
           <div className="flex flex-col gap-3">
@@ -229,6 +245,12 @@ const Dashboard = () => {
             <Button buttonText="Simulate" onClick={handleSimulate} disabled={isMoving} />
             <Button buttonText="Reset" onClick={handleReset} disabled={isMoving} />
           </div>
+=======
+          <Button buttonText="Start" />
+          <Button buttonText="Stop" />
+          <Button buttonText="Simulate" onClick={handleSimulate} />
+          <Button buttonText="Reset" />
+>>>>>>> Stashed changes
         </aside>
       </main>
     </div>

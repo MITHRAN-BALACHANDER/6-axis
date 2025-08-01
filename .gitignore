@@ -26,6 +26,14 @@ dist-ssr
 
 .vercel
 
+<<<<<<< Updated upstream
 dist*
 venv/
 
+=======
+
+backend ignore files
+_pycache_*
+*.pyc
+*.py
+>>>>>>> Stashed changes

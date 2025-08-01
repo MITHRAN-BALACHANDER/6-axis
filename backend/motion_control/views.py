@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -5,6 +6,34 @@ import numpy as np
 import math
 import logging
 from monitoring.models import RobotLog, SystemEvent
+=======
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+@csrf_exempt
+def move_robot(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            x = data.get('x')
+            y = data.get('y')
+
+            if x is not None and y is not None:
+                # In a real application, you would have robot control logic here.
+                # For now, we'll just log the received coordinates and return them.
+                print(f"Received coordinates: x={x}, y={y}")
+                
+                # Here you would add your robot movement calculation
+                # and control logic.
+                
+                return JsonResponse({'status': 'success', 'x': x, 'y': y})
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Invalid coordinates'}, status=400)
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+>>>>>>> Stashed changes
 
 
 class MotionProfileView(APIView):
