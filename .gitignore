@@ -26,14 +26,14 @@ dist-ssr
 
 .vercel
 
-<<<<<<< Updated upstream
 dist*
+
+# Python virtual environment
+backend/env/
 venv/
-
-=======
-
-backend ignore files
-_pycache_*
+ENV/
+env/
+envv/
 *.pyc
-*.py
->>>>>>> Stashed changes
+__pycache__/
+

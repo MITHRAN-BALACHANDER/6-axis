@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../components/Header';
-import Navbar from '../components/Navbar';
 import Button from '../components/Button';
 
 import {
@@ -70,8 +68,6 @@ const Graph = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-50 flex flex-col">
-      <Header />
-      <Navbar />
       <main className="flex-1 flex flex-col items-center justify-start px-2 sm:px-6 py-6">
         <div className="w-full bg-white rounded-2xl shadow-lg p-4 sm:p-8 mb-8">
           <h2 className="text-xl font-semibold text-green-800 mb-4 text-center">

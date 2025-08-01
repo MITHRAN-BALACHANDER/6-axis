@@ -7,17 +7,18 @@ import {
   Info,
   HelpCircle,
   LogOut,
-  FileText
+  FileText,
+  MessageSquare
 } from "lucide-react";
 
 const navItems = [
-  { label: "Dashboard", to: "/dashboard/", icon: LayoutDashboard },
-  { label: "Graph", to: "/graph/", icon: BarChart2 },
-  { label: "Settings", to: "/settings/", icon: Settings },
-  { label: "About", to: "/about/", icon: Info },
-  { label: "Help", to: "/help/", icon: HelpCircle },
-  { label: "Logs", to: "/logs/", icon: FileText },
-  { label: "Logout", to: "/logout/", icon: LogOut }
+  { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
+  { label: "Graph", to: "/graph", icon: BarChart2 },
+  { label: "Settings", to: "/settings", icon: Settings },
+  { label: "About", to: "/about", icon: Info },
+  { label: "Help", to: "/help", icon: HelpCircle },
+  { label: "Logs", to: "/logs", icon: FileText },
+  { label: "Logout", to: "/logout", icon: LogOut }
 ];
 
 export default function Navbar() {

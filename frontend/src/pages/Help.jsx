@@ -1,6 +1,4 @@
 import React from 'react';
-import Header from '../components/Header';
-import Navbar from '../components/Navbar';
 
 const faqs = [
   {
@@ -23,8 +21,6 @@ const faqs = [
 
 const Help = () => (
   <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-50 flex flex-col">
-    <Header />
-    <Navbar />
     <main className="flex-1 flex justify-center items-start px-2 py-8">
       <section className="bg-white rounded-2xl shadow-lg max-w-2xl w-full p-6 sm:p-10">
         <h1 className="text-3xl font-bold text-green-800 mb-6 text-center">Help & Support</h1>
