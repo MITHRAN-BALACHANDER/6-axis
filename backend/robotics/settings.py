@@ -22,6 +22,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-q_*(465!0a=j8h^(@5u7o&q670$muz+39)7abu(8yi%z#7)34f'
 
+# In a production environment, these should be set as environment variables
+LOG_USERNAME = os.environ.get('LOG_USERNAME', 'admin_logs')
+LOG_PASSWORD = os.environ.get('LOG_PASSWORD', 'pass')
+
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 

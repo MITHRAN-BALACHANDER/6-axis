@@ -27,13 +27,13 @@ dist-ssr
 .vercel
 
 dist*
-
-# Python virtual environment
-backend/env/
 venv/
-ENV/
-env/
-envv/
-*.pyc
 __pycache__/
 
+# Frontend
+frontend/node_modules/
+frontend/.env
+
+# Backend
+#backend/db.sqlite3
+backend/staticfiles/
