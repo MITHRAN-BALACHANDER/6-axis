@@ -15,7 +15,7 @@ const colorMap = {
 };
 
 export default function RobotModel({ jointAngles }) {
-  const { nodes, scene } = useGLTF("/robo_assembly.glb");
+  const { nodes, scene } = useGLTF("/Robot.glb");
   const robotGroupRef = useRef();
 
   useEffect(() => {
