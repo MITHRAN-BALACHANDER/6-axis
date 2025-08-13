@@ -36,27 +36,12 @@ const LogsPage = () => {
         axios.get('/api/monitoring/feedback/software/')
       ]);
       setMovementLogs(Array.isArray(movementResponse.data) ? movementResponse.data : []);
+      setSystemLogs(Array.isArray(systemResponse.data) ? systemResponse.data : []);
       
-      const allSystemLogs = Array.isArray(systemResponse.data) ? systemResponse.data : [];
-      
-      const systemErrorLogs = allSystemLogs.filter(log => 
-        log.event_type === 'APP_ERROR' || log.event_type === 'HW_ERROR'
-      );
-      setSystemLogs(systemErrorLogs);
-
-      const hardwareCommLogs = allSystemLogs
-        .filter(log => log.event_type.startsWith('HW_'))
-        .map(log => ({
-          id: `hw-${log.id}`,
-          timestamp: log.timestamp,
-          type: log.event_type === 'HW_COMMAND' ? 'HW Command' : 'HW Response',
-          message: log.message
-        }));
-
       const hardwareFeedback = Array.isArray(hardwareFeedbackResponse.data) ? hardwareFeedbackResponse.data.map(item => ({ ...item, type: 'Hardware' })) : [];
       const softwareFeedback = Array.isArray(softwareFeedbackResponse.data) ? softwareFeedbackResponse.data.map(item => ({ ...item, type: 'Software' })) : [];
       
-      setFeedback([...hardwareFeedback, ...softwareFeedback, ...hardwareCommLogs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)));
+      setFeedback([...hardwareFeedback, ...softwareFeedback].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)));
 
     } catch (error) {
       console.error('Error fetching data:', error);

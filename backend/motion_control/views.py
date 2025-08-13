@@ -4,7 +4,11 @@ from rest_framework import status
 import numpy as np
 import math
 import logging
+import socket  # Import socket for UDP communication
+import json    # Import json for encoding data
+import time    # Import time for timestamp
 from monitoring.models import RobotLog, SystemEvent
+from motion_control.models import RobotSettings  # Import RobotSettings
 
 
 class MotionProfileView(APIView):
@@ -36,7 +40,8 @@ class MotionProfileView(APIView):
         positions = np.cumsum(velocities) * (total_time / steps)
         accel = np.gradient(velocities, total_time / steps)
         return [
-            {"time": float(t), "position": float(p), "velocity": float(v), "acceleration": float(a)}
+            {"time": float(t), "position": float(p), "velocity": float(v),
+             "acceleration": float(a)}
             for t, p, v, a in zip(times, positions, velocities, accel)
         ]
 
@@ -95,67 +100,27 @@ class IK6DView(APIView):
         try:
             x = float(request.data.get("x"))
             y = float(request.data.get("y"))
-            z = float(request.data.get("z"))
-            roll = math.radians(float(request.data.get("roll", 0)))
-            pitch = math.radians(float(request.data.get("pitch", 0)))
-            yaw = math.radians(float(request.data.get("yaw", 0)))
-            
-            l1 = float(request.data.get("l1", 1.0))
-            l2 = float(request.data.get("l2", 1.0))
-            l3 = float(request.data.get("l3", 1.0))
-            l4 = float(request.data.get("l4", 0.5)) # Wrist length
-            
+            length1 = float(request.data.get("length1"))
+            length2 = float(request.data.get("length2"))
         except (TypeError, ValueError):
             return Response({"error": "Invalid or missing input."}, status=400)
 
         try:
-            # Rotation matrix from Euler angles
-            Rx = np.array([[1, 0, 0], [0, math.cos(roll), -math.sin(roll)], [0, math.sin(roll), math.cos(roll)]])
-            Ry = np.array([[math.cos(pitch), 0, math.sin(pitch)], [0, 1, 0], [-math.sin(pitch), 0, math.cos(pitch)]])
-            Rz = np.array([[math.cos(yaw), -math.sin(yaw), 0], [math.sin(yaw), math.cos(yaw), 0], [0, 0, 1]])
-            R0_6 = Rz @ Ry @ Rx
+            r = math.hypot(x, y)
+            if r > (length1 + length2):
+                SystemEvent.objects.create(
+                    event_type='ROBOT_ERROR',
+                    message=f"Target ({x}, {y}) is unreachable with arm lengths {length1}, {length2}."
+                )
+                return Response({"error": "Target unreachable with given arm lengths."}, status=400)
 
-            # Wrist center (xc, yc, zc)
-            p0_5 = np.array([x, y, z]) - l4 * R0_6[:, 2]
-            xc, yc, zc = p0_5
+            cos_angle2 = (x ** 2 + y ** 2 - length1 ** 2 - length2 ** 2) / (2 * length1 * length2)
+            cos_angle2 = max(min(cos_angle2, 1), -1)
+            angle2 = math.acos(cos_angle2)
 
-            # Theta 1
-            theta1 = math.atan2(yc, xc)
-
-            # Theta 3
-            r_sq = (xc - l1 * math.cos(theta1))**2 + (yc - l1 * math.sin(theta1))**2 + zc**2
-            cos_theta3 = (r_sq - l2**2 - l3**2) / (2 * l2 * l3)
-            if not (-1 <= cos_theta3 <= 1):
-                return Response({"error": "Target unreachable (Elbow)."}, status=400)
-            theta3 = math.acos(cos_theta3)
-
-            # Theta 2
-            s_theta3 = math.sin(theta3)
-            c_theta3 = math.cos(theta3)
-            k1 = l2 + l3 * c_theta3
-            k2 = l3 * s_theta3
-            theta2 = math.atan2(zc, math.sqrt(xc**2 + yc**2)) - math.atan2(k2, k1)
-
-            # Rotation matrix from base to wrist
-            R0_3 = np.array([
-                [math.cos(theta1)*math.cos(theta2+theta3), -math.cos(theta1)*math.sin(theta2+theta3), -math.sin(theta1)],
-                [math.sin(theta1)*math.cos(theta2+theta3), -math.sin(theta1)*math.sin(theta2+theta3), math.cos(theta1)],
-                [math.sin(theta2+theta3), math.cos(theta2+theta3), 0]
-            ])
-
-            R3_6 = np.linalg.inv(R0_3) @ R0_6
-            
-            # Theta 5
-            theta5 = math.acos(R3_6[2, 2])
-            
-            # Theta 4 and 6
-            if abs(math.sin(theta5)) > 1e-6:
-                theta4 = math.atan2(R3_6[1, 2], R3_6[0, 2])
-                theta6 = math.atan2(R3_6[2, 1], -R3_6[2, 0])
-            else: # Gimbal lock
-                theta4 = 0
-                theta6 = math.atan2(-R3_6[0, 1], R3_6[0, 0])
-
+            k1 = length1 + length2 * math.cos(angle2)
+            k2 = length2 * math.sin(angle2)
+            angle1 = math.atan2(y, x) - math.atan2(k2, k1)
 
             angles = {
                 "A1": math.degrees(theta1), "A2": math.degrees(theta2),
@@ -164,11 +129,74 @@ class IK6DView(APIView):
                 "Gripper": 0,
             }
 
-            RobotLog.objects.create(**{f"joint{i+1}": v for i, v in enumerate(angles.values()) if i < 6})
+            RobotLog.objects.create(
+                joint1=angles["A1"],
+                joint2=angles["A2"],
+                joint3=angles["A3"],
+                joint4=angles["A4"],
+                joint5=angles["A5"],
+                joint6=angles["A6"],
+            )
+
             logging.info(f"Robot moved to angles: {angles}")
+
+            # Send joint data via UDP
+            udp_host = '127.0.0.1'  # Or configure this via settings
+            udp_port = 12345  # Or configure this via settings
+            udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            try:
+                # Construct data in the specified format
+                # Fetch latest robot settings for velocity and acceleration
+                latest_settings = RobotSettings.objects.order_by(
+                    '-timestamp').first()
+
+                # Default values if no settings are found
+                speed_percentage = (latest_settings.speed_percentage
+                                    if latest_settings else 50.0)
+                acceleration_percentage = (
+                    latest_settings.acceleration_percentage
+                    if latest_settings else 50.0
+                )
+
+                # Convert percentages to actual values (assuming max values for scaling)
+                # These max values can be made configurable if needed
+                MAX_VELOCITY_UNIT = 100.0  # e.g., 100 degrees/second
+                MAX_ACCELERATION_UNIT = 100.0  # e.g., 100 degrees/second^2
+
+                current_vel = (speed_percentage / 100.0) * MAX_VELOCITY_UNIT
+                current_accel = (acceleration_percentage / 100.0) * MAX_ACCELERATION_UNIT
+
+                joint_data_list = []
+                for i, (joint_name, angle_value) in enumerate(angles.items()):
+                    if i < 6:  # Only include A1-A6 for joints list
+                        joint_data_list.append({
+                            "id": i + 1,
+                            "name": joint_name,
+                            "pos": float(angle_value),
+                            "vel": current_vel,
+                            "accel": current_accel
+                        })
+
+                data_to_send = {
+                    "timestamp": time.time(),  # Add timestamp
+                    "joints": joint_data_list,
+                    "gripper": {"position": float(angles.get("Gripper", 0.0)),
+                                "force": 0.0},  # Use gripper value
+                    "profile": "IK_calculated",  # Placeholder
+                    "status": "active"  # Placeholder status
+                }
+
+                message = json.dumps(data_to_send).encode('utf-8')
+                udp_sock.sendto(message, (udp_host, udp_port))
+                logging.info(f"Sent UDP: {message.decode('utf-8')}")
+            except Exception as udp_e:
+                logging.error(f"Error sending UDP data: {udp_e}")
+            finally:
+                udp_sock.close()
+
             return Response(angles)
 
         except Exception as e:
-            SystemEvent.objects.create(event_type='APP_ERROR', message=f"IK calculation error: {e}")
+            SystemEvent.objects.create(event_type='APP_ERROR', message=f"An error occurred during IK calculation: {e}")
             logging.error(f"Error in IK calculation: {e}")
             return Response({"error": str(e)}, status=500)
