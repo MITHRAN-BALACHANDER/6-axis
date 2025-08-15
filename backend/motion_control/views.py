@@ -5,8 +5,6 @@ import numpy as np
 import math
 import logging
 import socket  # Import socket for UDP communication
-import json    # Import json for encoding data
-import time    # Import time for timestamp
 from monitoring.models import RobotLog, SystemEvent
 from motion_control.models import RobotSettings  # Import RobotSettings
 
@@ -188,7 +186,6 @@ class IK6DView(APIView):
             udp_port = 12345  # Or configure this via settings
             udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             try:
-                # Construct data in the specified format
                 # Fetch latest robot settings for velocity and acceleration
                 latest_settings = RobotSettings.objects.order_by(
                     '-timestamp').first()
@@ -202,42 +199,27 @@ class IK6DView(APIView):
                 )
 
                 # Convert percentages to actual values (assuming max values for scaling)
-                # These max values can be made configurable if needed
                 MAX_VELOCITY_UNIT = 100.0  # e.g., 100 degrees/second
                 MAX_ACCELERATION_UNIT = 100.0  # e.g., 100 degrees/second^2
 
                 current_vel = (speed_percentage / 100.0) * MAX_VELOCITY_UNIT
                 current_accel = (acceleration_percentage / 100.0) * MAX_ACCELERATION_UNIT
 
-                joint_data_list = []
-                for i, (joint_name, angle_value) in enumerate(angles.items()):
-                    if i < 6:  # Only include A1-A6 for joints list
-                        joint_data_list.append({
-                            "id": i + 1,
-                            "name": joint_name,
-                            "pos": float(angle_value),
-                            "vel": current_vel,
-                            "accel": current_accel
-                        })
-
-                data_to_send = {
-                    "joints": [
-                        float(angles["A1"]),
-                        float(angles["A2"]),
-                        float(angles["A3"]),
-                        float(angles["A4"]),
-                        float(angles["A5"]),
-                        float(angles["A6"])
-                    ],
-                    "vel": current_vel,
-                    "accel": current_accel,
-                    "grip": float(angles.get("Gripper", 0.0))
-                }
-
-
-                message = json.dumps(data_to_send).encode('utf-8')
+                # Construct data in the specified comma-separated format: A1,A2,A3,A4,A5,A6,Vel,Accel,Gripper
+                a1 = float(angles.get("A1", 0.0))
+                a2 = float(angles.get("A2", 0.0))
+                a3 = float(angles.get("A3", 0.0))
+                a4 = float(angles.get("A4", 0.0))
+                a5 = float(angles.get("A5", 0.0))
+                a6 = float(angles.get("A6", 0.0))
+                gripper_pos = float(angles.get("Gripper", 0.0))
+                
+                data_string = (f"{a1},{a2},{a3},{a4},{a5},{a6},"
+                               f"{current_vel},{current_accel},{gripper_pos}")
+                
+                message = data_string.encode('utf-8')
                 udp_sock.sendto(message, (udp_host, udp_port))
-                logging.info(f"Sent UDP: {message.decode('utf-8')}")
+                logging.info(f"Sent UDP: {data_string}")
             except Exception as udp_e:
                 logging.error(f"Error sending UDP data: {udp_e}")
             finally:
