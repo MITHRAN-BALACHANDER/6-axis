@@ -169,7 +169,6 @@ class IK6DView(APIView):
 
             RobotLog.objects.create(**{f"joint{i+1}": v for i, v in enumerate(angles.values()) if i < 6})
             logging.info(f"Robot moved to angles: {angles}")
-<<<<<<< HEAD
 
             # Send joint data via UDP
             udp_host = '127.0.0.1'  # Or configure this via settings
@@ -215,8 +214,7 @@ class IK6DView(APIView):
             finally:
                 udp_sock.close()
 
-=======
->>>>>>> 2fd0c8aa46ce7c03ef9e4f8a869e121574921d18
+
             return Response(angles)
 
         except Exception as e:

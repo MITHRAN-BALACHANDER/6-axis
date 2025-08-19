@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config # Import config
+from urllib.parse import quote_plus # Import quote_plus
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -23,12 +26,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-q_*(465!0a=j8h^(@5u7o&q670$muz+39)7abu(8yi%z#7)34f'
 
 # In a production environment, these should be set as environment variables
-LOG_USERNAME = os.environ.get('LOG_USERNAME', 'admin_logs')
-LOG_PASSWORD = os.environ.get('LOG_PASSWORD', 'pass')
+LOG_USERNAME = config('LOG_USERNAME', default='admin_logs')
+LOG_PASSWORD = config('LOG_PASSWORD', default='pass')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = config('DEBUG', default='False', cast=bool)
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
 
@@ -54,6 +57,7 @@ INSTALLED_APPS = [
     'monitoring',  # 
     'rest_framework',
     'channels',  # For WebSockets
+    'djongo', # Add djongo to installed apps
 ]
 ASGI_APPLICATION = "robotics.asgi.application"
 
@@ -99,8 +103,12 @@ WSGI_APPLICATION = 'robotics.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'djongo',
+        'NAME': '6-axis-db', # You can change this to your desired database name
+        'ENFORCE_SCHEMA': False, # Set to True if you want to enforce Django model schema
+        'CLIENT': {
+            'host': f"mongodb+srv://{quote_plus(config('MONGO_DB_USERNAME'))}:{quote_plus(config('MONGO_DB_PASSWORD'))}@6-axis-cluster.shly9bz.mongodb.net/?retryWrites=true&w=majority&appName=6-axis-Cluster"
+        }
     }
 }
 
@@ -155,6 +163,20 @@ CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Patch for Djongo NotImplementedError with PyMongo
+# This addresses the error: "Database objects do not implement truth value testing or bool()"
+try:
+    import djongo.base
+    def _close_patched(self):
+        if self.client_connection is not None: # Check client_connection
+            self.client_connection.close() # Call close on client_connection
+            self.client_connection = None
+        self.connection = None # Also set the database connection to None
+    djongo.base.DatabaseWrapper._close = _close_patched
+except Exception as e:
+    print(f"Could not patch djongo.base.DatabaseWrapper._close: {e}")
+
 
 LOGGING = {
     'version': 1,
