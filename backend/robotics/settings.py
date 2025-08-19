@@ -53,8 +53,9 @@ INSTALLED_APPS = [
     'motion_control',  # 
     'monitoring',  # 
     'rest_framework',
-    # 'channels',  # For WebSockets
+    'channels',  # For WebSockets
 ]
+ASGI_APPLICATION = "robotics.asgi.application"
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

@@ -37,3 +37,5 @@ frontend/.env
 # Backend
 #backend/db.sqlite3
 backend/staticfiles/
+
+backend/udp_communication/

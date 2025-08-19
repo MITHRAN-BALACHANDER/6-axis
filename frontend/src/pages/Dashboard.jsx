@@ -62,11 +62,76 @@ const Dashboard = () => {
   // State for X/Y/Z target fields and orientation
   const [target, setTarget] = useState({ x: 1.4, y: 1.2, z: 0.5, roll: 0, pitch: 0, yaw: 0 });
   const [ikError, setIkError] = useState("");
+  const [comment, setComment] = useState("");
+  const [connectionStatus, setConnectionStatus] = useState("Connecting...");
+  const [deviceName, setDeviceName] = useState(null);
+  const [deviceDescription, setDeviceDescription] = useState(null);
 
 
   // Control state for the robot's operating mode
   const [isMoving, setIsMoving] = useState(false);
 
+
+  // WebSocket connection
+  const ws = useRef(null);
+
+  useEffect(() => {
+    ws.current = new WebSocket("ws://localhost:8001/ws/robot/");
+    ws.current.onopen = () => {
+      console.log("WebSocket connected");
+      setConnectionStatus("WebSocket connected, attempting serial...");
+    };
+    ws.current.onclose = () => {
+      console.log("WebSocket disconnected");
+      setConnectionStatus("Disconnected");
+    };
+    ws.current.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.status === 'connected') {
+          setConnectionStatus("Connected");
+          setDeviceName(data.device);
+          setDeviceDescription(data.description);
+        } else if (data.status === 'disconnected') {
+          setConnectionStatus("Disconnected");
+          setDeviceName(null);
+          setDeviceDescription(null);
+          console.error("Device disconnected:", data.error);
+        } else if (data.status === 'error') {
+          setConnectionStatus("Error");
+          setDeviceName(null);
+          setDeviceDescription(null);
+          console.error("Connection error:", data.error);
+        } else {
+          console.log("WebSocket message:", event.data);
+        }
+      } catch (e) {
+        console.log("Received non-JSON message:", event.data);
+      }
+    };
+
+    return () => {
+      if (ws.current) {
+        ws.current.close();
+      }
+    };
+  }, []);
+
+  // Send joint angles to the backend whenever they change
+  useEffect(() => {
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify({ type: "angles", payload: jointAngles }));
+    }
+  }, [jointAngles]);
+
+  const sendComment = () => {
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify({ type: "comment", payload: comment }));
+      setComment("");
+    } else {
+      console.error("WebSocket is not connected.");
+    }
+  };
 
   // Send IK request to backend and update robot
   const calculateAndMoveRobot = useCallback(async (currentTarget) => {
@@ -189,6 +254,18 @@ const Dashboard = () => {
         <aside className="w-full lg:w-[30%] flex flex-col gap-5 bg-white rounded-2xl shadow-lg p-4 sm:p-6">
           <h3 className="text-lg font-semibold mb-2 text-gray-800">Controls</h3>
 
+          {/* Connection Status */}
+          <div className="mb-2">
+            <p className="font-medium text-gray-700">
+              Status: <span className="font-normal text-gray-900">{connectionStatus}</span>
+              {deviceName && (
+                <span className="ml-2 font-normal text-gray-900">
+                  ({deviceName} - {deviceDescription})
+                </span>
+              )}
+            </p>
+          </div>
+
           {/* X/Y/Z input fields at the TOP */}
           <div className="flex flex-col gap-3">
             <label className="font-medium text-gray-700 flex flex-col">
@@ -270,6 +347,22 @@ const Dashboard = () => {
             <Button buttonText="Stop" onClick={handleStop} disabled={!isMoving} />
             <Button buttonText="Simulate" onClick={handleSimulate} disabled={isMoving} />
             <Button buttonText="Reset" onClick={handleReset} disabled={isMoving} />
+          </div>
+
+          {/* Comment Section */}
+          <div className="mt-4">
+            <h4 className="font-semibold text-gray-800 mb-2">Comments</h4>
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className="w-full p-2 border rounded"
+              placeholder="Type your comment..."
+            />
+            <Button
+              buttonText="Send Comment"
+              onClick={sendComment}
+              className="mt-2"
+            />
           </div>
         </aside>
       </main>
