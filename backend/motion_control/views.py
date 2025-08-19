@@ -108,19 +108,16 @@ class IK6DView(APIView):
             l1 = float(request.data.get("l1", 1.0))
             l2 = float(request.data.get("l2", 1.0))
             l3 = float(request.data.get("l3", 1.0))
-            l4 = float(request.data.get("l4", 0.5))   # Wrist length
+            l4 = float(request.data.get("l4", 0.5)) # Wrist length
             
         except (TypeError, ValueError):
             return Response({"error": "Invalid or missing input."}, status=400)
 
         try:
             # Rotation matrix from Euler angles
-            Rx = np.array([[1, 0, 0], [0, math.cos(roll), -math.sin(roll)],
-                           [0, math.sin(roll), math.cos(roll)]])
-            Ry = np.array([[math.cos(pitch), 0, math.sin(pitch)], [0, 1, 0],
-                           [-math.sin(pitch), 0, math.cos(pitch)]])
-            Rz = np.array([[math.cos(yaw), -math.sin(yaw), 0],
-                           [math.sin(yaw), math.cos(yaw), 0], [0, 0, 1]])
+            Rx = np.array([[1, 0, 0], [0, math.cos(roll), -math.sin(roll)], [0, math.sin(roll), math.cos(roll)]])
+            Ry = np.array([[math.cos(pitch), 0, math.sin(pitch)], [0, 1, 0], [-math.sin(pitch), 0, math.cos(pitch)]])
+            Rz = np.array([[math.cos(yaw), -math.sin(yaw), 0], [math.sin(yaw), math.cos(yaw), 0], [0, 0, 1]])
             R0_6 = Rz @ Ry @ Rx
 
             # Wrist center (xc, yc, zc)
@@ -131,12 +128,10 @@ class IK6DView(APIView):
             theta1 = math.atan2(yc, xc)
 
             # Theta 3
-            r_sq = (xc - l1 * math.cos(theta1))**2 + \
-                   (yc - l1 * math.sin(theta1))**2 + zc**2
+            r_sq = (xc - l1 * math.cos(theta1))**2 + (yc - l1 * math.sin(theta1))**2 + zc**2
             cos_theta3 = (r_sq - l2**2 - l3**2) / (2 * l2 * l3)
             if not (-1 <= cos_theta3 <= 1):
-                return Response({"error": "Target unreachable (Elbow)."},
-                                status=400)
+                return Response({"error": "Target unreachable (Elbow)."}, status=400)
             theta3 = math.acos(cos_theta3)
 
             # Theta 2
@@ -148,12 +143,8 @@ class IK6DView(APIView):
 
             # Rotation matrix from base to wrist
             R0_3 = np.array([
-                [math.cos(theta1)*math.cos(theta2+theta3),
-                 -math.cos(theta1)*math.sin(theta2+theta3),
-                 -math.sin(theta1)],
-                [math.sin(theta1)*math.cos(theta2+theta3),
-                 -math.sin(theta1)*math.sin(theta2+theta3),
-                 math.cos(theta1)],
+                [math.cos(theta1)*math.cos(theta2+theta3), -math.cos(theta1)*math.sin(theta2+theta3), -math.sin(theta1)],
+                [math.sin(theta1)*math.cos(theta2+theta3), -math.sin(theta1)*math.sin(theta2+theta3), math.cos(theta1)],
                 [math.sin(theta2+theta3), math.cos(theta2+theta3), 0]
             ])
 
@@ -166,7 +157,7 @@ class IK6DView(APIView):
             if abs(math.sin(theta5)) > 1e-6:
                 theta4 = math.atan2(R3_6[1, 2], R3_6[0, 2])
                 theta6 = math.atan2(R3_6[2, 1], -R3_6[2, 0])
-            else:  # Gimbal lock
+            else: # Gimbal lock
                 theta4 = 0
                 theta6 = math.atan2(-R3_6[0, 1], R3_6[0, 0])
 
@@ -178,75 +169,11 @@ class IK6DView(APIView):
                 "Gripper": 0,
             }
 
-            # Log robot movement
-            RobotLog.objects.create(**{f"joint{i+1}": v for i, v in
-                                        enumerate(angles.values()) if i < 6})
+            RobotLog.objects.create(**{f"joint{i+1}": v for i, v in enumerate(angles.values()) if i < 6})
             logging.info(f"Robot moved to angles: {angles}")
-
-            # Send joint data via UDP
-            udp_host = '127.0.0.1'  # Or configure this via settings
-            udp_port = 12345  # Or configure this via settings
-            udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            try:
-                # Construct data in the specified format
-                # Fetch latest robot settings for velocity and acceleration
-                latest_settings = RobotSettings.objects.order_by(
-                    '-timestamp').first()
-
-                # Default values if no settings are found
-                speed_percentage = (latest_settings.speed_percentage
-                                    if latest_settings else 50.0)
-                acceleration_percentage = (
-                    latest_settings.acceleration_percentage
-                    if latest_settings else 50.0
-                )
-
-                # Convert percentages to actual values (assuming max values for scaling)
-                # These max values can be made configurable if needed
-                MAX_VELOCITY_UNIT = 100.0  # e.g., 100 degrees/second
-                MAX_ACCELERATION_UNIT = 100.0  # e.g., 100 degrees/second^2
-
-                current_vel = (speed_percentage / 100.0) * MAX_VELOCITY_UNIT
-                current_accel = (acceleration_percentage / 100.0) * MAX_ACCELERATION_UNIT
-
-                joint_data_list = []
-                for i, (joint_name, angle_value) in enumerate(angles.items()):
-                    if i < 6:  # Only include A1-A6 for joints list
-                        joint_data_list.append({
-                            "id": i + 1,
-                            "name": joint_name,
-                            "pos": float(angle_value),
-                            "vel": current_vel,
-                            "accel": current_accel
-                        })
-
-                data_to_send = {
-                    "joints": [
-                        float(angles["A1"]),
-                        float(angles["A2"]),
-                        float(angles["A3"]),
-                        float(angles["A4"]),
-                        float(angles["A5"]),
-                        float(angles["A6"])
-                    ],
-                    "vel": current_vel,
-                    "accel": current_accel,
-                    "grip": float(angles.get("Gripper", 0.0))
-                }
-
-
-                message = json.dumps(data_to_send).encode('utf-8')
-                udp_sock.sendto(message, (udp_host, udp_port))
-                logging.info(f"Sent UDP: {message.decode('utf-8')}")
-            except Exception as udp_e:
-                logging.error(f"Error sending UDP data: {udp_e}")
-            finally:
-                udp_sock.close()
-
             return Response(angles)
 
         except Exception as e:
-            SystemEvent.objects.create(event_type='APP_ERROR',
-                                       message=f"IK calculation error: {e}")
+            SystemEvent.objects.create(event_type='APP_ERROR', message=f"IK calculation error: {e}")
             logging.error(f"Error in IK calculation: {e}")
             return Response({"error": str(e)}, status=500)
