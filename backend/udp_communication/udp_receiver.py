@@ -15,12 +15,7 @@ django.setup()
 
 from monitoring.models import Feedback
 
-
-<<<<<<< HEAD
 def udp_receiver(host='127.0.0.1', port=12345):
-=======
-def udp_receiver(host='0.0.0.0', port=12345):
->>>>>>> 88345c50a7651eb7c9de74f57bcaf2beadc01ad1
     """
     Receives JSON-encoded robot joint data over UDP and logs it to Django
     Feedback model.
