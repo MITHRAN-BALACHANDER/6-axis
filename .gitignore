@@ -41,3 +41,4 @@ frontend/.env
 backend/staticfiles/
 
 backend/udp_communication/
+backend/monitoring/migrations/0007_receivedrobotdata.py

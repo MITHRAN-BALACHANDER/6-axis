@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
         const checkAuth = async () => {
             try {
                 // This endpoint should return if the user is authenticated
-                await axios.get('/api/auth/check-auth/');
+                await axios.get('http://localhost:8000/api/auth/check-auth/');
                 setIsAuthenticated(true);
             } catch (error) {
                 setIsAuthenticated(false);
@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (username, password) => {
-        const response = await axios.post('/api/auth/login/', { username, password });
+        const response = await axios.post('http://localhost:8000/api/auth/login/', { username, password });
         if (response.status === 200) {
             setIsAuthenticated(true);
         }
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = async () => {
-        await axios.post('/api/auth/logout/');
+        await axios.post('http://localhost:8000/api/auth/logout/');
         setIsAuthenticated(false);
     };
 

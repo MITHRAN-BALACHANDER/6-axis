@@ -5,8 +5,6 @@ import numpy as np
 import math
 import logging
 import socket  # Import socket for UDP communication
-import json    # Import json for encoding data
-import time    # Import time for timestamp
 from monitoring.models import RobotLog, SystemEvent
 from motion_control.models import RobotSettings  # Import RobotSettings
 
@@ -171,6 +169,52 @@ class IK6DView(APIView):
 
             RobotLog.objects.create(**{f"joint{i+1}": v for i, v in enumerate(angles.values()) if i < 6})
             logging.info(f"Robot moved to angles: {angles}")
+
+            # Send joint data via UDP
+            udp_host = '127.0.0.1'  # Or configure this via settings
+            udp_port = 12345  # Or configure this via settings
+            udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            try:
+                # Fetch latest robot settings for velocity and acceleration
+                latest_settings = RobotSettings.objects.order_by(
+                    '-timestamp').first()
+
+                # Default values if no settings are found
+                speed_percentage = (latest_settings.speed_percentage
+                                    if latest_settings else 50.0)
+                acceleration_percentage = (
+                    latest_settings.acceleration_percentage
+                    if latest_settings else 50.0
+                )
+
+                # Convert percentages to actual values (assuming max values for scaling)
+                MAX_VELOCITY_UNIT = 100.0  # e.g., 100 degrees/second
+                MAX_ACCELERATION_UNIT = 100.0  # e.g., 100 degrees/second^2
+
+                current_vel = (speed_percentage / 100.0) * MAX_VELOCITY_UNIT
+                current_accel = (acceleration_percentage / 100.0) * MAX_ACCELERATION_UNIT
+
+                # Construct data in the specified comma-separated format: A1,A2,A3,A4,A5,A6,Vel,Accel,Gripper
+                a1 = float(angles.get("A1", 0.0))
+                a2 = float(angles.get("A2", 0.0))
+                a3 = float(angles.get("A3", 0.0))
+                a4 = float(angles.get("A4", 0.0))
+                a5 = float(angles.get("A5", 0.0))
+                a6 = float(angles.get("A6", 0.0))
+                gripper_pos = float(angles.get("Gripper", 0.0))
+                
+                data_string = (f"{a1},{a2},{a3},{a4},{a5},{a6},"
+                               f"{current_vel},{current_accel},{gripper_pos}")
+                
+                message = data_string.encode('utf-8')
+                udp_sock.sendto(message, (udp_host, udp_port))
+                logging.info(f"Sent UDP: {data_string}")
+            except Exception as udp_e:
+                logging.error(f"Error sending UDP data: {udp_e}")
+            finally:
+                udp_sock.close()
+
+
             return Response(angles)
 
         except Exception as e:
