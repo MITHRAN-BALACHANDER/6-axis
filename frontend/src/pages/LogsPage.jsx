@@ -192,7 +192,7 @@ const LogsPage = () => {
                       <tr key={item.id}>
                         <td className="py-2 px-4 border-b">{new Date(item.timestamp).toLocaleString()}</td>
                         <td className="py-2 px-4 border-b">{item.type}</td>
-                        <td className="py-2 px-4 border-b">{item.message}</td>
+                        <td className="py-2 px-4 border-b">{item.message.includes('Error: ') ? item.message.split('Error: ')[1].split(',')[0] : item.message}</td>
                       </tr>
                     ))
                   ) : (
