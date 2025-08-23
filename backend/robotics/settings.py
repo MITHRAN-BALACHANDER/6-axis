@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-q_*(465!0a=j8h^(@5u7o&q670$muz+39)7abu(8yi%z#7)34f
 
 # In a production environment, these should be set as environment variables
 LOG_USERNAME = config('LOG_USERNAME', default='admin_logs')
-LOG_PASSWORD = config('LOG_PASSWORD', default='pass')
+LOG_PASSWORD = config('LOG_PASSWORD', default='admin_logs')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
+    # 'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'user_management',  #
@@ -182,6 +182,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #     djongo.base.DatabaseWrapper._close = _close_patched
 # except Exception as e:
 #     print("Could not patch djongo.base.DatabaseWrapper._close: {e}")
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
 
 LOGGING = {
     'version': 1,
