@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
 const FeedbackPage = () => {
   console.log("FeedbackPage rendered");
   const [feedback, setFeedback] = useState([]);
@@ -12,8 +14,8 @@ const FeedbackPage = () => {
     }
     try {
       const [hardwareResponse, softwareResponse] = await Promise.all([
-        axios.get('/api/monitoring/feedback/hardware/'),
-        axios.get('/api/monitoring/feedback/software/')
+        axios.get(`${API_BASE_URL}/api/monitoring/feedback/hardware/`),
+        axios.get(`${API_BASE_URL}/api/monitoring/feedback/software/`)
       ]);
 
       const hardwareFeedback = Array.isArray(hardwareResponse.data) ? hardwareResponse.data.map(item => ({ ...item, type: 'Hardware' })) : [];

@@ -31,7 +31,7 @@ LOG_PASSWORD = config('LOG_PASSWORD', default='pass')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default='False', cast=bool)
+DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
 
@@ -172,16 +172,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # The following patch for Djongo was causing issues with session management
 # and premature closing of the MongoDB client.
 # It is being commented out to resolve the "Cannot use MongoClient after close" error.
-# try:
-#     import djongo.base
-#     def _close_patched(self):
-#         if self.client_connection is not None:  # Check client_connection
-#             self.client_connection.close()  # Call close on client_connection
-#             self.client_connection = None
-#         self.connection = None  # Also set the database connection to None
-#     djongo.base.DatabaseWrapper._close = _close_patched
-# except Exception as e:
-#     print("Could not patch djongo.base.DatabaseWrapper._close: {e}")
+try:
+    import djongo.base
+    def _close_patched(self):
+        if self.client_connection is not None:  # Check client_connection
+            self.client_connection.close()  # Call close on client_connection
+            self.client_connection = None
+        self.connection = None  # Also set the database connection to None
+    djongo.base.DatabaseWrapper._close = _close_patched
+except Exception as e:
+    print(f"Could not patch djongo.base.DatabaseWrapper._close: {e}")
 
 LOGGING = {
     'version': 1,
