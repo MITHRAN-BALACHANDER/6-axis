@@ -23,7 +23,7 @@ const About = () => {
             <br />
             Email: <a href="mailto:info@siet.ac.in" className="text-blue-700 underline">admin@siet.ac.in</a>
             <br />
-            Sri Shakthi Institute of Engineering and Technology, Coimbatore, India
+            Sri Shakthi Institute of Engineering and Technology, Coimbatore, India.
           </p>
         </section>
       </main>
