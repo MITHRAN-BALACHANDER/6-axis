@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
 const LogsPage = () => {
   const [isLocked, setIsLocked] = useState(true);
   const [password, setPassword] = useState('');
@@ -14,7 +16,7 @@ const LogsPage = () => {
     e.preventDefault();
     setIsVerifying(true);
     try {
-      await axios.post('/api/auth/verify-log-password/', { password });
+      await axios.post(`${API_BASE_URL}/api/auth/verify-log-password/`, { password });
       setIsLocked(false);
     } catch (error) {
       console.error('Incorrect password', error);
@@ -30,10 +32,10 @@ const LogsPage = () => {
     }
     try {
       const [movementResponse, systemResponse, hardwareFeedbackResponse, softwareFeedbackResponse] = await Promise.all([
-        axios.get('/api/monitoring/logs/'),
-        axios.get('/api/monitoring/system-events/'),
-        axios.get('/api/monitoring/feedback/hardware/'),
-        axios.get('/api/monitoring/feedback/software/')
+        axios.get(`${API_BASE_URL}/api/monitoring/logs/`),
+        axios.get(`${API_BASE_URL}/api/monitoring/system-events/`),
+        axios.get(`${API_BASE_URL}/api/monitoring/feedback/hardware/`),
+        axios.get(`${API_BASE_URL}/api/monitoring/feedback/software/`)
       ]);
       setMovementLogs(Array.isArray(movementResponse.data) ? movementResponse.data : []);
       setSystemLogs(Array.isArray(systemResponse.data) ? systemResponse.data : []);

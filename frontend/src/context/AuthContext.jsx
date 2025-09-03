@@ -11,7 +11,8 @@ export const AuthProvider = ({ children }) => {
         const checkAuth = async () => {
             try {
                 // This endpoint should return if the user is authenticated
-                await axios.get('http://localhost:8000/api/auth/check-auth/');
+                const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+                await axios.get(`${API_BASE_URL}/api/auth/check-auth/`);
                 setIsAuthenticated(true);
             } catch (error) {
                 setIsAuthenticated(false);
@@ -23,7 +24,8 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (username, password) => {
-        const response = await axios.post('http://localhost:8000/api/auth/login/', { username, password });
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+        const response = await axios.post(`${API_BASE_URL}/api/auth/login/`, { username, password });
         if (response.status === 200) {
             setIsAuthenticated(true);
         }
@@ -31,7 +33,8 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = async () => {
-        await axios.post('http://localhost:8000/api/auth/logout/');
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+        await axios.post(`${API_BASE_URL}/api/auth/logout/`);
         setIsAuthenticated(false);
     };
 

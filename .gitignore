@@ -39,6 +39,7 @@ backend/.env
 .
 #backend/db.sqlite3
 backend/staticfiles/
-
-backend/udp_communication/
+backend/monitoring/migrations/__pycache__/__init__.cpython-312.pyc
+backend/monitoring/migrations/__pycache__/__init__.cpython-312.pyc
 backend/monitoring/migrations/0007_receivedrobotdata.py
+backend/monitoring/migrations/__pycache__/__init__.cpython-312.pyc

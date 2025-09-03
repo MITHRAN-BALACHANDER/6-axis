@@ -2,5 +2,6 @@
 # exit on error
 set -o errexit
 
+cd frontend
 npm install
-npm run build 
+npm run build
