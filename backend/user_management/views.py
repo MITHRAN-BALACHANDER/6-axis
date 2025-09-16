@@ -5,6 +5,7 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from monitoring.models import SystemEvent
 from django.conf import settings
+from serial.tools import list_ports
 
 class RegisterView(APIView):
     def post(self, request):
@@ -55,3 +56,16 @@ class VerifyLogPasswordView(APIView):
             return Response({'success': True})
         else:
             return Response({'success': False}, status=status.HTTP_401_UNAUTHORIZED)
+
+class ListSerialPortsView(APIView):
+    def get(self, request):
+        ports = list_ports.comports()
+        available_ports = []
+        for p in ports:
+            available_ports.append({
+                'device': p.device,
+                'name': p.name,
+                'description': p.description,
+                'hwid': p.hwid
+            })
+        return Response({'ports': available_ports}, status=status.HTTP_200_OK)

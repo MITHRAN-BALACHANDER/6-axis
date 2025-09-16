@@ -169,19 +169,22 @@ CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# The following patch for Djongo was causing issues with session management
-# and premature closing of the MongoDB client.
-# It is being commented out to resolve the "Cannot use MongoClient after close" error.
+# Patch for Djongo to handle PyMongo compatibility issues during connection closing
 try:
     import djongo.base
     def _close_patched(self):
-        if self.client_connection is not None:  # Check client_connection
-            self.client_connection.close()  # Call close on client_connection
+        # Only close the MongoClient if it exists
+        if self.client_connection is not None:
+            self.client_connection.close()
             self.client_connection = None
-        self.connection = None  # Also set the database connection to None
+        # Clear the database object reference, but do not call .close() on it
+        # The 'if self.connection is not None' check is kept to avoid NotImplementedError
+        if self.connection is not None:
+            self.connection = None
     djongo.base.DatabaseWrapper._close = _close_patched
 except Exception as e:
     print(f"Could not patch djongo.base.DatabaseWrapper._close: {e}")
+
 
 LOGGING = {
     'version': 1,

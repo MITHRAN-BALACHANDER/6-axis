@@ -1,13 +1,13 @@
-Django==3.2.*
-django-cors-headers>=4.0.0
-djangorestframework>=3.14.0
+Django==3.1.12
+django-cors-headers==3.11.0
+djangorestframework==3.13.1
 gunicorn>=21.0.0
 whitenoise>=6.5.0
 python-decouple>=3.8
 numpy>=2.3.2
-channels>=4.0.0
-daphne>=4.0.0
-djongo>=1.3.6
-pymongo==3.11.4 # Pin pymongo to a compatible version
+channels==3.0.5
+daphne==3.0.2
+djongo==1.3.7
 sqlparse==0.2.4
 dnspython
+pyserial

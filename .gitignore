@@ -1,45 +1,152 @@
-# Logs
-logs
+# ================================
+# PYTHON / DJANGO BACKEND
+# ================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Virtual environments
+venv/
+env/
+ENV/
+.env
+.venv
+env.bak/
+venv.bak/
+
+# Django specific
 *.log
+*.pot
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+*/migrations/[0-9]*.py
+*/migrations/__pycache__/
+
+# Django local settings
+local_settings.py
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# ================================
+# FRONTEND / NODE.JS
+# ================================
+
+# Dependencies
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-env
-dist-ssr
+# Build outputs
+dist/
+dist-ssr/
+build/
 *.local
 
-# Editor directories and files
+# ================================
+# DEVELOPMENT TOOLS & EDITORS
+# ================================
+
+# IDEs
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
+*.swp
+*.swo
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ================================
+# DEPLOYMENT & HOSTING
+# ================================
+
 .vercel
+.netlify/
 
-dist*
-venv/
-__pycache__/
+# ================================
+# PROJECT SPECIFIC
+# ================================
 
-# Frontend
-frontend/node_modules/
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 frontend/.env
-
-# Backend
 backend/.env
-.
-#backend/db.sqlite3
-backend/staticfiles/
-backend/monitoring/migrations/__pycache__/__init__.cpython-312.pyc
-backend/monitoring/migrations/__pycache__/__init__.cpython-312.pyc
+
+# Log files
+logs/
+*.log
+
+# Backup files
+*.bak
+*.backup
+
+# Temporary files
+*.tmp
+*.temp
+
+# Django sessions
+django_sessions/
+
+# ROS related (if using ROS bridge)
+*.bag
 backend/monitoring/migrations/0007_receivedrobotdata.py
-backend/monitoring/migrations/__pycache__/__init__.cpython-312.pyc
