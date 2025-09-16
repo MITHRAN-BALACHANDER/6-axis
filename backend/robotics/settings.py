@@ -54,7 +54,6 @@ INSTALLED_APPS = [
     'monitoring',  #
     'rest_framework',
     'channels',  # For WebSockets
-    'djongo',  # Add djongo to installed apps
 ]
 ASGI_APPLICATION = "robotics.asgi.application"
 
@@ -100,17 +99,8 @@ WSGI_APPLICATION = 'robotics.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'djongo',
-        'NAME': '6-axis-db',  # You can change this to your desired database name
-        'ENFORCE_SCHEMA': False,  # Set to True if you want to enforce Django model schema
-        'CLIENT': {
-            'host': (
-                f"mongodb+srv://{quote_plus(config('MONGO_DB_USERNAME'))}:"
-                f"{quote_plus(config('MONGO_DB_PASSWORD'))}"
-                "@6-axis-cluster.shly9bz.mongodb.net/"
-                "?retryWrites=true&w=majority&appName=6-axis-Cluster"
-            )
-        }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -169,19 +159,6 @@ CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# The following patch for Djongo was causing issues with session management
-# and premature closing of the MongoDB client.
-# It is being commented out to resolve the "Cannot use MongoClient after close" error.
-try:
-    import djongo.base
-    def _close_patched(self):
-        if self.client_connection is not None:  # Check client_connection
-            self.client_connection.close()  # Call close on client_connection
-            self.client_connection = None
-        self.connection = None  # Also set the database connection to None
-    djongo.base.DatabaseWrapper._close = _close_patched
-except Exception as e:
-    print(f"Could not patch djongo.base.DatabaseWrapper._close: {e}")
 
 LOGGING = {
     'version': 1,
