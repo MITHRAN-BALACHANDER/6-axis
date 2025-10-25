@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-q_*(465!0a=j8h^(@5u7o&q670$muz+39)7abu(8yi%z#7)34f
 
 # In a production environment, these should be set as environment variables
 LOG_USERNAME = config('LOG_USERNAME', default='admin_logs')
-LOG_PASSWORD = config('LOG_PASSWORD', default='pass')
+LOG_PASSWORD = config('LOG_PASSWORD', default='admin_logs')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
+    # 'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'user_management',  #
@@ -169,22 +169,22 @@ CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Patch for Djongo to handle PyMongo compatibility issues during connection closing
+# The following patch for Djongo was causing issues with session management
+# and premature closing of the MongoDB client.
+# It is being commented out to resolve the "Cannot use MongoClient after close" error.
 try:
     import djongo.base
     def _close_patched(self):
-        # Only close the MongoClient if it exists
-        if self.client_connection is not None:
-            self.client_connection.close()
+        if self.client_connection is not None:  # Check client_connection
+            self.client_connection.close()  # Call close on client_connection
             self.client_connection = None
-        # Clear the database object reference, but do not call .close() on it
-        # The 'if self.connection is not None' check is kept to avoid NotImplementedError
-        if self.connection is not None:
-            self.connection = None
+        self.connection = None  # Also set the database connection to None
     djongo.base.DatabaseWrapper._close = _close_patched
 except Exception as e:
     print(f"Could not patch djongo.base.DatabaseWrapper._close: {e}")
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
 
 LOGGING = {
     'version': 1,

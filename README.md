@@ -1,5 +1,6 @@
 6--axis Robot
 
+
 ```
 robotics-6axis-webapp/
 │
@@ -153,3 +154,6 @@ Cloud & API Integrations
  Remote Control via Web: Enable robot operation from a web browser securely.
  Integration with MES/ERP: Connect to factory automation systems.
  MQTT & IoT Integration: Communicate with smart sensors & edge devices.
+
+
+
