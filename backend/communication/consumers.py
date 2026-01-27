@@ -6,7 +6,6 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 import platform
 from serial.tools import list_ports
-import time
 
 
 class RobotConsumer(AsyncWebsocketConsumer):
@@ -17,6 +16,7 @@ class RobotConsumer(AsyncWebsocketConsumer):
         self.send_queue = queue.Queue()
         self.receive_queue = queue.Queue()
         self.running = False
+        self.stop_event = threading.Event()
 
     async def connect(self):
         await self.accept()
@@ -25,7 +25,8 @@ class RobotConsumer(AsyncWebsocketConsumer):
         self.port_name = (
             "COM4" if platform.system() == "Windows" else "/dev/ttyUSB0"
         )  # Default serial port
-        device_description = "Unknown Device"  # Initialize with a default value
+        device_description = "Unknown Device"  # Initialize
+        # with a default value
 
         ports = list_ports.comports()
         for p in ports:
@@ -34,7 +35,9 @@ class RobotConsumer(AsyncWebsocketConsumer):
                 break
         
         try:
-            self.serial_port = serial.Serial(self.port_name, baudrate=115200, timeout=0.1)
+            self.serial_port = serial.Serial(
+                self.port_name, baudrate=115200, timeout=0.1
+            )
             self.serial_thread = threading.Thread(
                 target=self.serial_worker, daemon=True
             )
@@ -59,14 +62,16 @@ class RobotConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         self.running = False
+        self.stop_event.set()  # Signal the serial worker to stop
         if hasattr(self, 'check_connection_task'):
             self.check_connection_task.cancel()
         if hasattr(self, 'receive_task'):
             self.receive_task.cancel()
+        if self.serial_thread and self.serial_thread.is_alive():
+            # Give thread a bit more time, though event should make it faster
+            self.serial_thread.join(timeout=2)
         if self.serial_port and self.serial_port.is_open:
             self.serial_port.close()
-        if self.serial_thread and self.serial_thread.is_alive():
-            self.serial_thread.join(timeout=1)  # Give thread a moment to finish
 
     async def read_from_queue(self):
         while self.running:
@@ -83,9 +88,11 @@ class RobotConsumer(AsyncWebsocketConsumer):
             try:
                 # Read from serial
                 if self.serial_port.in_waiting > 0:
-                    line = self.serial_port.readline().decode(
-                        'utf-8', errors='ignore'
-                    ).strip()
+                    line = (
+                        self.serial_port.readline()
+                        .decode('utf-8', errors='ignore')
+                        .strip()
+                    )
                     if line:
                         self.receive_queue.put(line)
                 
@@ -104,7 +111,8 @@ class RobotConsumer(AsyncWebsocketConsumer):
                 self.running = False
                 break
             
-            time.sleep(0.01)  # Small sleep to prevent busy-waiting
+            # Wait for a short period or until signaled to stop
+            self.stop_event.wait(0.01)
 
     async def check_serial_connection(self):
         while self.running:
@@ -132,7 +140,7 @@ class RobotConsumer(AsyncWebsocketConsumer):
         elif data.get("type") == "angles":
             angles = data.get("payload")
             angle_str = ",".join(
-                [f"{key}:{value}" for key, value in angles.items()]
+                f"{key}:{value}" for key, value in angles.items()
             )
             print(f"Sending angles: {angle_str}")
             self.send_queue.put(angle_str)

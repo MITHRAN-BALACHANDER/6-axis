@@ -12,8 +12,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
-from decouple import config # Import config
-from urllib.parse import quote_plus # Import quote_plus
+from decouple import config  # Import config
+from urllib.parse import quote_plus  # Import quote_plus
+import certifi
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,7 +29,6 @@ SECRET_KEY = 'django-insecure-q_*(465!0a=j8h^(@5u7o&q670$muz+39)7abu(8yi%z#7)34f
 # In a production environment, these should be set as environment variables
 LOG_USERNAME = config('LOG_USERNAME', default='admin_logs')
 LOG_PASSWORD = config('LOG_PASSWORD', default='pass')
-
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -48,10 +48,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'user_management',  #
-    'reports',  #
-    'motion_control',  #
-    'monitoring',  #
+    'user_management',
+    'reports',
+    'motion_control',
+    'monitoring',
     'rest_framework',
     'channels',  # For WebSockets
     'djongo',  # Add djongo to installed apps
@@ -71,6 +71,7 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://localhost:5174",  # Alternative Vite port
     "https://six-axis-frontend.onrender.com",  # Your frontend URL
 ]
 
@@ -101,16 +102,18 @@ WSGI_APPLICATION = 'robotics.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
-        'NAME': '6-axis-db',  # You can change this to your desired database name
-        'ENFORCE_SCHEMA': False,  # Set to True if you want to enforce Django model schema
+        'NAME': '6-axis-db',
+        'ENFORCE_SCHEMA': False,
         'CLIENT': {
             'host': (
                 f"mongodb+srv://{quote_plus(config('MONGO_DB_USERNAME'))}:"
                 f"{quote_plus(config('MONGO_DB_PASSWORD'))}"
                 "@6-axis-cluster.shly9bz.mongodb.net/"
                 "?retryWrites=true&w=majority&appName=6-axis-Cluster"
-            )
-        }
+            ),
+            'tls': True,
+            'tlsCAFile': certifi.where(),
+        },
     }
 }
 
@@ -120,20 +123,20 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': ('django.contrib.auth.password_validation.'
-                 'UserAttributeSimilarityValidator'),
+        'NAME': 'django.contrib.auth.password_validation.'
+                'UserAttributeSimilarityValidator',
     },
     {
-        'NAME': ('django.contrib.auth.password_validation.'
-                 'MinimumLengthValidator'),
+        'NAME': 'django.contrib.auth.password_validation.'
+                'MinimumLengthValidator',
     },
     {
-        'NAME': ('django.contrib.auth.password_validation.'
-                 'CommonPasswordValidator'),
+        'NAME': 'django.contrib.auth.password_validation.'
+                'CommonPasswordValidator',
     },
     {
-        'NAME': ('django.contrib.auth.password_validation.'
-                 'NumericPasswordValidator'),
+        'NAME': 'django.contrib.auth.password_validation.'
+                'NumericPasswordValidator',
     },
 ]
 
@@ -161,7 +164,23 @@ MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_HTTPONLY = False
-CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
+CSRF_TRUSTED_ORIGINS = ['http://localhost:5173', 'http://localhost:5174']
+
+# Session cookie settings for cross-origin requests
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_COOKIE_AGE = 86400  # 24 hours
+
+# REST Framework settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+}
 
 
 # Default primary key field type
@@ -169,16 +188,18 @@ CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Patch for Djongo to handle PyMongo compatibility issues during connection closing
+# Patch for Djongo to handle PyMongo compatibility issues
 try:
     import djongo.base
+
     def _close_patched(self):
         # Only close the MongoClient if it exists
         if self.client_connection is not None:
             self.client_connection.close()
             self.client_connection = None
         # Clear the database object reference, but do not call .close() on it
-        # The 'if self.connection is not None' check is kept to avoid NotImplementedError
+        # The 'if self.connection is not None' check is kept to avoid
+        # NotImplementedError
         if self.connection is not None:
             self.connection = None
     djongo.base.DatabaseWrapper._close = _close_patched

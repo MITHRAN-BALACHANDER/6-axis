@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from monitoring.models import SystemEvent
 from django.conf import settings
 from serial.tools import list_ports
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.utils.decorators import method_decorator
 
 class RegisterView(APIView):
     def post(self, request):
@@ -20,7 +22,12 @@ class RegisterView(APIView):
         login(request, user)
         return Response({'message': 'User registered and logged in successfully.'})
 
+@method_decorator(ensure_csrf_cookie, name='dispatch')
 class LoginView(APIView):
+    def get(self, request):
+        # This endpoint is used to set the CSRF cookie
+        return Response({'detail': 'CSRF cookie set'})
+    
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
