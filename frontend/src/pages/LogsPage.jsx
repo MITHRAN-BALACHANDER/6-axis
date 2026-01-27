@@ -12,6 +12,16 @@ const LogsPage = () => {
   const [feedback, setFeedback] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const formatAngle = (value) => {
+    const num = typeof value === 'number' ? value : Number(value);
+    return Number.isFinite(num) ? num.toFixed(2) : '—';
+  };
+
+  const formatTimestamp = (value) => {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString();
+  };
+
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     setIsVerifying(true);
@@ -118,13 +128,13 @@ const LogsPage = () => {
                   {movementLogs.length > 0 ? (
                     movementLogs.map((log) => (
                       <tr key={log.id}>
-                        <td className="py-2 px-4 border-b">{new Date(log.timestamp).toLocaleString()}</td>
-                        <td className="py-2 px-4 border-b">{log.joint1 != null ? log.joint1.toFixed(2) : 'N/A'}</td>
-                        <td className="py-2 px-4 border-b">{log.joint2 != null ? log.joint2.toFixed(2) : 'N/A'}</td>
-                        <td className="py-2 px-4 border-b">{log.joint3 != null ? log.joint3.toFixed(2) : 'N/A'}</td>
-                        <td className="py-2 px-4 border-b">{log.joint4 != null ? log.joint4.toFixed(2) : 'N/A'}</td>
-                        <td className="py-2 px-4 border-b">{log.joint5 != null ? log.joint5.toFixed(2) : 'N/A'}</td>
-                        <td className="py-2 px-4 border-b">{log.joint6 != null ? log.joint6.toFixed(2) : 'N/A'}</td>
+                        <td className="py-2 px-4 border-b">{formatTimestamp(log.timestamp)}</td>
+                        <td className="py-2 px-4 border-b">{formatAngle(log.joint1)}</td>
+                        <td className="py-2 px-4 border-b">{formatAngle(log.joint2)}</td>
+                        <td className="py-2 px-4 border-b">{formatAngle(log.joint3)}</td>
+                        <td className="py-2 px-4 border-b">{formatAngle(log.joint4)}</td>
+                        <td className="py-2 px-4 border-b">{formatAngle(log.joint5)}</td>
+                        <td className="py-2 px-4 border-b">{formatAngle(log.joint6)}</td>
                       </tr>
                     ))
                   ) : (
@@ -157,7 +167,7 @@ const LogsPage = () => {
                   {systemLogs.length > 0 ? (
                     systemLogs.map((event) => (
                       <tr key={event.id}>
-                        <td className="py-2 px-4 border-b">{new Date(event.timestamp).toLocaleString()}</td>
+                        <td className="py-2 px-4 border-b">{formatTimestamp(event.timestamp)}</td>
                         <td className="py-2 px-4 border-b">{event.event_type}</td>
                         <td className="py-2 px-4 border-b">{event.message}</td>
                       </tr>
@@ -192,9 +202,11 @@ const LogsPage = () => {
                   {feedback.length > 0 ? (
                     feedback.map((item) => (
                       <tr key={item.id}>
-                        <td className="py-2 px-4 border-b">{new Date(item.timestamp).toLocaleString()}</td>
+                        <td className="py-2 px-4 border-b">{formatTimestamp(item.timestamp)}</td>
                         <td className="py-2 px-4 border-b">{item.type}</td>
-                        <td className="py-2 px-4 border-b">{item.message.includes('Error: ') ? item.message.split('Error: ')[1].split(',')[0] : item.message}</td>
+                        <td className="py-2 px-4 border-b">
+                          {item.message.includes('Error: ') ? item.message.split('Error: ')[1].split(',')[0] : item.message}
+                        </td>
                       </tr>
                     ))
                   ) : (

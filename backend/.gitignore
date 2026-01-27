@@ -1,9 +1,22 @@
-# Python
+# General
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
-.Python
+.DS_Store
+*.bak
+
+# Django
+*.log
+*.pot
+*.pyc
+db.sqlite3
+media/
+staticfiles/
+django_sessions/
+logs/
+
+# Python / Environment
 build/
 develop-eggs/
 dist/
@@ -19,14 +32,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-
-# Django
-*.log
-*.pot
-*.pyc
-db.sqlite3
-media/
-staticfiles/
+MANIFEST
 
 # Virtual Environment
 venv/
@@ -57,6 +63,3 @@ coverage.xml
 *.cover
 .hypothesis/
 
-# Misc
-.DS_Store
-*.bak

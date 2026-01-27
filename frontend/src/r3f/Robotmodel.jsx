@@ -17,6 +17,8 @@ const colorMap = {
 export default function RobotModel({ jointAngles }) {
   const { nodes, scene } = useGLTF("/Robot.glb");
   const robotGroupRef = useRef();
+  // Damping factor for smooth, slower transitions
+  const damping = 1.25; // smaller = slower; larger = faster
 
   useEffect(() => {
     if (!nodes) return;
@@ -38,22 +40,30 @@ export default function RobotModel({ jointAngles }) {
     });
   }, [nodes, scene, jointAngles.roughness, jointAngles.metalness]);
 
-  useFrame(() => {
+  // Smoothly interpolate position and joint rotations towards target angles
+  useFrame((state, delta) => {
     if (!nodes) return;
-    
+    // Convert damping to a frame-based interpolation factor
+    const alpha = 1 - Math.exp(-damping * (delta || 0.016));
+
+    // Smooth position
     if (robotGroupRef.current) {
-      robotGroupRef.current.position.set(jointAngles.positionX, jointAngles.positionY, jointAngles.positionZ);
+      const pos = robotGroupRef.current.position;
+      pos.x += (jointAngles.positionX - pos.x) * alpha;
+      pos.y += (jointAngles.positionY - pos.y) * alpha;
+      pos.z += (jointAngles.positionZ - pos.z) * alpha;
     }
 
-    if (nodes.A1_bone) nodes.A1_bone.rotation.y = jointAngles.A1;
-    if (nodes.A2_bone) nodes.A2_bone.rotation.z = jointAngles.A2;
-    if (nodes.A3_bone) nodes.A3_bone.rotation.z = jointAngles.A3;
-    if (nodes.A4_bone) nodes.A4_bone.rotation.y = jointAngles.A4;
-    if (nodes.A5_bone) nodes.A5_bone.rotation.z = jointAngles.A5;
-    if (nodes.A6_bone) nodes.A6_bone.rotation.y = jointAngles.A6;
+    // Smooth joint rotations
+    if (nodes.A1_bone) nodes.A1_bone.rotation.y += (jointAngles.A1 - nodes.A1_bone.rotation.y) * alpha;
+    if (nodes.A2_bone) nodes.A2_bone.rotation.z += (jointAngles.A2 - nodes.A2_bone.rotation.z) * alpha;
+    if (nodes.A3_bone) nodes.A3_bone.rotation.z += (jointAngles.A3 - nodes.A3_bone.rotation.z) * alpha;
+    if (nodes.A4_bone) nodes.A4_bone.rotation.y += (jointAngles.A4 - nodes.A4_bone.rotation.y) * alpha;
+    if (nodes.A5_bone) nodes.A5_bone.rotation.z += (jointAngles.A5 - nodes.A5_bone.rotation.z) * alpha;
+    if (nodes.A6_bone) nodes.A6_bone.rotation.y += (jointAngles.A6 - nodes.A6_bone.rotation.y) * alpha;
 
-    if (nodes.Gripper) nodes.Gripper.rotation.z = jointAngles.Gripper;
-    if (nodes.Gripper001) nodes.Gripper001.rotation.z = -jointAngles.Gripper;
+    if (nodes.Gripper) nodes.Gripper.rotation.z += (jointAngles.Gripper - nodes.Gripper.rotation.z) * alpha;
+    if (nodes.Gripper001) nodes.Gripper001.rotation.z += ((-jointAngles.Gripper) - nodes.Gripper001.rotation.z) * alpha;
   });
 
   return (

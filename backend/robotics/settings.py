@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
+    # 'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'user_management',
@@ -193,9 +193,8 @@ try:
     import djongo.base
 
     def _close_patched(self):
-        # Only close the MongoClient if it exists
-        if self.client_connection is not None:
-            self.client_connection.close()
+        if self.client_connection is not None:  # Check client_connection
+            self.client_connection.close()  # Call close on client_connection
             self.client_connection = None
         # Clear the database object reference, but do not call .close() on it
         # The 'if self.connection is not None' check is kept to avoid
@@ -206,6 +205,8 @@ try:
 except Exception as e:
     print(f"Could not patch djongo.base.DatabaseWrapper._close: {e}")
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
 
 LOGGING = {
     'version': 1,
