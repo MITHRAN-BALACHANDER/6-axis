@@ -24,16 +24,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-q_*(465!0a=j8h^(@5u7o&q670$muz+39)7abu(8yi%z#7)34f'
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-q_*(465!0a=j8h^(@5u7o&q670$muz+39)7abu(8yi%z#7)34f')
 
 # In a production environment, these should be set as environment variables
 LOG_USERNAME = config('LOG_USERNAME', default='admin_logs')
 LOG_PASSWORD = config('LOG_PASSWORD', default='pass')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,.onrender.com', cast=lambda v: [s.strip() for s in v.split(',')])
+
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -45,7 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    # 'django.contrib.sessions',
+    'django.contrib.sessions',  # Uncommented to ensure admin works if needed, standard django app
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'user_management',
@@ -69,11 +71,16 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = [
+# Get CORS origins from env, append local defaults
+CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default="", cast=lambda v: [s.strip() for s in v.split(',') if s])
+CORS_ALLOWED_ORIGINS.extend([
     "http://localhost:5173",
     "http://localhost:5174",  # Alternative Vite port
-    "https://six-axis-frontend.onrender.com",  # Your frontend URL
-]
+    "https://six-axis-frontend.onrender.com",
+    "https://six-axis-backend.onrender.com"
+])
+# Remove duplicates
+CORS_ALLOWED_ORIGINS = list(set(CORS_ALLOWED_ORIGINS))
 
 ROOT_URLCONF = 'robotics.urls'
 
