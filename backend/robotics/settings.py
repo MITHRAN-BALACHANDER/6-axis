@@ -56,7 +56,6 @@ INSTALLED_APPS = [
     'monitoring',
     'rest_framework',
     'channels',  # For WebSockets
-    'djongo',  # Add djongo to installed apps
 ]
 ASGI_APPLICATION = "robotics.asgi.application"
 
@@ -106,23 +105,42 @@ WSGI_APPLICATION = 'robotics.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'djongo',
-        'NAME': '6-axis-db',
-        'ENFORCE_SCHEMA': False,
-        'CLIENT': {
-            'host': (
-                f"mongodb+srv://{quote_plus(config('MONGO_DB_USERNAME'))}:"
-                f"{quote_plus(config('MONGO_DB_PASSWORD'))}"
-                "@6-axis-cluster.shly9bz.mongodb.net/"
-                "?retryWrites=true&w=majority&appName=6-axis-Cluster"
-            ),
-            'tls': True,
-            'tlsCAFile': certifi.where(),
-        },
+import dj_database_url
+
+# Primary DB (PostgreSQL on Render, SQLite locally)
+# check if DATABASE_URL is set (Render automatically sets this for Postgres)
+if 'DATABASE_URL' in os.environ:
+    DATABASES = {
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=True,
+        )
     }
-}
+else:
+    # Fallback to SQLite for local development
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
+# MongoDB Configuration (Non-Relational Data: Logs, Telemetry)
+MONGO_DB_USERNAME = config('MONGO_DB_USERNAME', default='')
+MONGO_DB_PASSWORD = config('MONGO_DB_PASSWORD', default='')
+
+if MONGO_DB_USERNAME and MONGO_DB_PASSWORD:
+    MONGO_URI = (
+        f"mongodb+srv://{quote_plus(MONGO_DB_USERNAME)}:"
+        f"{quote_plus(MONGO_DB_PASSWORD)}"
+        "@6-axis-cluster.shly9bz.mongodb.net/"
+        "?retryWrites=true&w=majority&appName=6-axis-Cluster"
+    )
+else:
+    MONGO_URI = None
+
+# No more Djongo patches needed
 
 
 # Password validation
@@ -194,23 +212,6 @@ REST_FRAMEWORK = {
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Patch for Djongo to handle PyMongo compatibility issues
-try:
-    import djongo.base
-
-    def _close_patched(self):
-        if self.client_connection is not None:  # Check client_connection
-            self.client_connection.close()  # Call close on client_connection
-            self.client_connection = None
-        # Clear the database object reference, but do not call .close() on it
-        # The 'if self.connection is not None' check is kept to avoid
-        # NotImplementedError
-        if self.connection is not None:
-            self.connection = None
-    djongo.base.DatabaseWrapper._close = _close_patched
-except Exception as e:
-    print(f"Could not patch djongo.base.DatabaseWrapper._close: {e}")
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = 'default'
