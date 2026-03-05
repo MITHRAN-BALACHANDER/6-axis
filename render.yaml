@@ -1,29 +1,40 @@
 services:
   - type: web
-    name: 6-axis-backend
+    name: six-axis-backend
     env: python
-    plan: free
+    rootDir: backend
     buildCommand: "./build.sh"
-    startCommand: "gunicorn robotics.wsgi:application --bind 0.0.0.0:$PORT"
-    rootDir: backend/
+    startCommand: "daphne -b 0.0.0.0 -p $PORT robotics.asgi:application"
+    plan: free
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG
         value: "False"
+      - key: LOG_USERNAME
+        value: admin_logs
+      - key: LOG_PASSWORD
+        value: pass
       - key: ALLOWED_HOSTS
-        value: "localhost,127.0.0.1,6-axis-backend.onrender.com,6-axis-frontend.onrender.com"
+        value: "localhost,127.0.0.1,six-axis-backend.onrender.com"
       - key: CORS_ALLOWED_ORIGINS
-        value: "https://6-axis-frontend.onrender.com"
+        value: "https://six-axis-frontend.onrender.com"
+      - key: MONGO_DB_USERNAME
+        sync: false
+      - key: MONGO_DB_PASSWORD
+        sync: false
 
   - type: static_site
-    name: 6-axis-frontend
+    name: six-axis-frontend
+    rootDir: frontend
+    buildCommand: "npm install && npm run build"
+    staticPublishPath: dist
     plan: free
-    buildCommand: "npm install --prefix ./frontend && npm run build --prefix ./frontend"
-    staticPublishPath: frontend/dist/
     rewrites:
       - source: /*
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        value: "https://6-axis-backend.onrender.com"
+        value: "https://six-axis-backend.onrender.com"

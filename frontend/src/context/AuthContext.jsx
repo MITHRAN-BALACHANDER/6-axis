@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
+import '../utils/csrf'; // Import CSRF configuration
 
 export const AuthContext = createContext(null);
 
@@ -25,11 +26,26 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (username, password) => {
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-        const response = await axios.post(`${API_BASE_URL}/api/auth/login/`, { username, password });
-        if (response.status === 200) {
-            setIsAuthenticated(true);
+        try {
+            // First, get CSRF token by calling the GET endpoint
+            console.log('Getting CSRF token...');
+            await axios.get(`${API_BASE_URL}/api/auth/login/`);
+            console.log('CSRF cookie:', document.cookie);
+            
+            // Then, perform the actual login
+            console.log('Attempting login for:', username);
+            const response = await axios.post(`${API_BASE_URL}/api/auth/login/`, { username, password });
+            console.log('Login response:', response);
+            
+            if (response.status === 200) {
+                setIsAuthenticated(true);
+            }
+            return response;
+        } catch (error) {
+            console.error('Login error:', error);
+            console.error('Error response:', error.response);
+            throw error;
         }
-        return response;
     };
 
     const logout = async () => {

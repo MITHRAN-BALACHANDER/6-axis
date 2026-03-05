@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 const LINK_LENGTHS = { link2: 90, link3: 75, link4: 45, link5: 55, link6: 40 }; 
 const LINK_COLORS = [
@@ -14,11 +14,48 @@ function radToDeg(r) {
 }
 
 export default function Robot2DViewer({ jointAngles }) {
+  // Smoothing setup similar to 3D model
+  const damping = 1.5; // lower = smoother/slower; higher = faster
+  const smoothAnglesRef = useRef({
+    A1: jointAngles?.A1 || 0,
+    A2: jointAngles?.A2 || 0,
+    A3: jointAngles?.A3 || 0,
+    A4: jointAngles?.A4 || 0,
+    A5: jointAngles?.A5 || 0,
+    A6: jointAngles?.A6 || 0,
+  });
+  const [tick, setTick] = useState(0); // triggers re-render after smoothing updates
+
+  useEffect(() => {
+    let last = performance.now();
+    let rafId;
+    const loop = (now) => {
+      const delta = (now - last) / 1000; // seconds
+      last = now;
+      const alpha = 1 - Math.exp(-damping * (delta || 0.016));
+      const s = smoothAnglesRef.current;
+
+      // Lerp towards target jointAngles
+      s.A1 += ((jointAngles?.A1 || 0) - s.A1) * alpha;
+      s.A2 += ((jointAngles?.A2 || 0) - s.A2) * alpha;
+      s.A3 += ((jointAngles?.A3 || 0) - s.A3) * alpha;
+      s.A4 += ((jointAngles?.A4 || 0) - s.A4) * alpha;
+      s.A5 += ((jointAngles?.A5 || 0) - s.A5) * alpha;
+      s.A6 += ((jointAngles?.A6 || 0) - s.A6) * alpha;
+
+      setTick((t) => t + 1);
+      rafId = requestAnimationFrame(loop);
+    };
+    rafId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(rafId);
+  }, [jointAngles, damping]);
+
   const { positions, jointSummary, base } = useMemo(() => { // Destructure 'base' here
     const baseCoord = { x: 280, y: 330 }; // Define base coordinate inside useMemo
+    // Read smoothed angles for rendering
     const {
-      A1 = 0, A2 = 0, A3 = 0, A4 = 0, A5 = 0, A6 = 0, // Keep all values from props
-    } = jointAngles || {};
+      A1 = 0, A2 = 0, A3 = 0, A4 = 0, A5 = 0, A6 = 0,
+    } = smoothAnglesRef.current || {};
 
     // --- Kinematic Calculation for 2D Diagram ---
     // A4, A5, A6 are static in the 2D diagram geometry.
@@ -60,7 +97,7 @@ export default function Robot2DViewer({ jointAngles }) {
     ];
 
     return { positions: pos, jointSummary: summary, base: baseCoord }; // Return baseCoord as 'base'
-  }, [jointAngles]); // Recalculate if jointAngles change
+  }, [tick]); // Recalculate on each smoothing tick
 
   return (
     <div className="flex flex-col h-full w-full">

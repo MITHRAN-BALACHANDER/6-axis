@@ -1,45 +1,48 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
-dist
-env
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# General
 .DS_Store
+Thumb.db
+*.log
+
+# Editors
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
 
-.vercel
+# Dependency directories
+node_modules/
+jspm_packages/
 
-dist*
-venv/
+# Python / Backend
 __pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv/
+*.pot
+*.pyc
 
-# Frontend
-frontend/node_modules/
-frontend/.env
+# Django specifics
+db.sqlite3
+media/
+staticfiles/
+*.sqlite3
 
-# Backend
-backend/.env
-.
-#backend/db.sqlite3
-backend/staticfiles/
-backend/monitoring/migrations/__pycache__/__init__.cpython-312.pyc
-backend/monitoring/migrations/__pycache__/__init__.cpython-312.pyc
-backend/monitoring/migrations/0007_receivedrobotdata.py
-backend/monitoring/migrations/__pycache__/__init__.cpython-312.pyc
+# JS / Frontend
+dist/
+dist-ssr/
+build/
+.output/
+.vercel/
+*.local
+
+# Environment variables
+.env
+.env.*
+!.env.example
