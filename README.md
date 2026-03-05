@@ -1,159 +1,737 @@
-6--axis Robot
+# 6-Axis Robotic Arm Control System
 
+## Executive Summary
 
-```
-robotics-6axis-webapp/
-│
-├── backend/                           # Django Backend
-│   ├── robotics/                      # Django Project Root
-│   │   ├── settings.py                # Django settings
-│   │   ├── urls.py                    # Main URL router
-│   │   ├── wsgi.py                    # WSGI entry point
-│   │   ├── asgi.py                    # ASGI entry point (for WebSockets)
-│   │   ├── _init_.py                 
-│   │
-│   ├── motion_control/                 # Robot Motion Control
-│   │   ├── models.py                   # Database for motion profiles, robot state
-│   │   ├── views.py                    # Django API endpoints for motion
-│   │   ├── urls.py                     # API routes
-│   │   ├── serializers.py              # Django REST serializers
-│   │   ├── tasks.py                    # Celery tasks for async motion
-│   │   ├── ros_bridge.py               # Communicates with ROS (rospy/rosbridge)
-│   │   ├── motion_planner.py           # Path planning, IK, trajectory generation
-│   │   ├── collision_detection.py      # Safety checks for robot movement
-│   │   ├── _init_.py                 
-│   │
-│   ├── user_management/                 # Authentication & Roles
-│   │   ├── models.py                    # User roles, permissions
-│   │   ├── views.py                     # Login, API authentication
-│   │   ├── urls.py                      # User management routes
-│   │   ├── serializers.py               
-│   │   ├── _init_.py                  
-│   │
-│   ├── monitoring/                      # Real-time monitoring
-│   │   ├── views.py                     # System monitoring API
-│   │   ├── urls.py                      # Routes for monitoring endpoints
-│   │   ├── analytics.py                 # Motion analytics processing
-│   │   ├── logging.py                   # System logging
-│   │   ├── _init_.py                  
-│   │
-│   ├── reports/                         # Logs & Analytics
-│   │   ├── views.py                     # Generates reports
-│   │   ├── urls.py                      # API routes for reports
-│   │   ├── pdf_generator.py             # Converts logs to PDF
-│   │   ├── csv_export.py                # Exports data to CSV
-│   │   ├── _init_.py                  
-│   │
-│   ├── static/                          # CSS, JS, images
-│   ├── media/                           # Uploaded motion files (optional)
-│   ├── manage.py                        # Django CLI tool
-│
-│
-├── frontend/                            # React Frontend
-│   ├── public/                          # Static files (index.html)
-│   ├── src/                             # React app source
-│   │   ├── components/                  # UI Components
-│   │   │   ├── MotionControl.js         # Robot motion control UI
-│   │   │   ├── LiveStatus.js            # Real-time status display
-│   │   │   ├── UserAuth.js              # Login, authentication
-│   │   │   ├── Analytics.js             # Robot motion analytics UI
-│   │   │   ├── Reports.js               # PDF/CSV reports UI
-│   │   ├── pages/                       # Page Components
-│   │   │   ├── Dashboard.js             # Main Dashboard
-│   │   │   ├── MotionPage.js            # Motion Control Page
-│   │   │   ├── LogsPage.js              # Logs and Reports
-│   │   ├── services/                    # API calls (axios)
-│   │   │   ├── motionAPI.js             # Calls motion control API
-│   │   │   ├── authAPI.js               # Calls authentication API
-│   │   ├── context/                     # React Context for global state
-│   │   ├── utils/                       # Helper functions
-│   │   ├── App.js                       # Main entry point
-│   │   ├── index.js                     # ReactDOM render
-│   │   ├── routes.js                    # React Router setup
-│   │   ├── styles/                      # CSS, Tailwind, Styled Components
-│   ├── package.json                     # Dependencies
-│   ├── vite.config.js                    # Configuration for fast bundling
-│
-│
-├── ros_ws/                              # ROS Workspace (Robot Control)
-│   ├── src/                             # Source files for ROS nodes
-│   │   ├── motion_control_node/         # ROS package for motion control
-│   │   │   ├── scripts/                 # Python ROS scripts
-│   │   │   │   ├── motion_controller.py # ROS node for motion control
-│   │   │   │   ├── robot_status.py      # Publishes robot state
-│   │   │   │   ├── path_planner.py      # Implements trajectory planning
-│   │   │   │   ├── inverse_kinematics.py# Computes joint angles from end-effector pos
-│   │   │   ├── launch/                  # ROS launch files
-│   │   │   │   ├── start.launch         # Launch file to start ROS nodes
-│   │   │   ├── CMakeLists.txt           # ROS build config
-│   │   │   ├── package.xml              # ROS package definition
-│   │   │   ├── _init_.py
+The 6-Axis Robotic Arm Control System is an enterprise-grade web application designed for real-time control, monitoring, and visualization of industrial robotic manipulators. The platform provides comprehensive motion planning, inverse kinematics computation, real-time data logging, and advanced analytics capabilities through an intuitive web interface with 3D visualization.
+
+## Table of Contents
+
+1. [System Overview](#system-overview)
+2. [Core Features](#core-features)
+3. [System Architecture](#system-architecture)
+4. [Technology Stack](#technology-stack)
+5. [Prerequisites](#prerequisites)
+6. [Installation](#installation)
+7. [Configuration](#configuration)
+8. [API Documentation](#api-documentation)
+9. [Project Structure](#project-structure)
+10. [Development](#development)
+11. [Deployment](#deployment)
+12. [Security Considerations](#security-considerations)
+13. [Troubleshooting](#troubleshooting)
+14. [Maintenance](#maintenance)
+15. [License](#license)
+
+## System Overview
+
+This platform integrates advanced robotics control algorithms with modern web technologies to deliver a comprehensive solution for managing 6-axis robotic arms. The system enables operators to control robot movements, monitor performance metrics in real-time, generate detailed reports, and visualize robot configurations through an interactive 3D interface.
+
+### Key Use Cases
+
+- Industrial automation control and monitoring
+- Robot motion planning and trajectory optimization
+- Real-time performance analytics and logging
+- Remote robot operation and supervision
+- Predictive maintenance through data analysis
+- Educational and training applications
+
+## Core Features
+
+### Motion Control
+
+- **Inverse Kinematics Engine**: Real-time calculation of joint angles from desired end-effector positions
+- **Motion Profile Generation**: Support for multiple trajectory profiles including:
+  - Default linear profiles
+  - Triangular velocity profiles
+  - Trapezoidal acceleration profiles
+  - S-curve (jerk-limited) profiles
+- **Collision Detection**: Built-in algorithms to prevent unsafe robot movements
+- **Real-time UDP Communication**: Low-latency data transmission to microcontroller hardware
+
+### Monitoring & Analytics
+
+- **Real-time Data Logging**: Comprehensive logging of robot operations, system events, and performance metrics
+- **System Event Tracking**: Automatic capture and categorization of system-level events
+- **Hardware/Software Feedback**: Separate channels for hardware and software feedback data
+- **Performance Analytics**: Advanced analytics engine for operational insights
+- **Data Visualization**: Interactive charts and graphs for trend analysis
+
+### Communication Systems
+
+- **WebSocket Support**: Real-time bidirectional communication with connected clients
+- **Serial Communication**: Direct integration with STM32 and other microcontroller platforms
+- **UDP Protocol**: High-speed data transmission for motion commands
+- **REST API**: Comprehensive RESTful interface for all system operations
+
+### User Management
+
+- **Role-Based Access Control**: Secure authentication and authorization system
+- **User Administration**: Administrative tools for user management
+- **Session Management**: Secure session handling with configurable timeout policies
+
+### Reporting
+
+- **PDF Report Generation**: Automated generation of operational reports
+- **CSV Data Export**: Bulk data export capabilities for external analysis
+- **Custom Report Templates**: Configurable report formats and content
+
+### 3D Visualization
+
+- **Interactive Robot Model**: Real-time 3D visualization using React Three Fiber
+- **Joint Manipulation**: Direct manipulation of robot joints through the UI
+- **Workspace Visualization**: Visual representation of robot reach and constraints
+- **Camera Controls**: Multiple viewing angles and zoom capabilities
+
+## System Architecture
+
+### High-Level Architecture
 
 ```
-Basic Functionalities required
+┌─────────────────────────────────────────────────────────────┐
+│                        Client Layer                          │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │   Web UI     │  │  3D Viewer   │  │  Dashboard   │      │
+│  │  (React)     │  │ (Three.js)   │  │  (Charts)    │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+└─────────────────────┬───────────────────────────────────────┘
+                      │ HTTP/WebSocket
+┌─────────────────────┴───────────────────────────────────────┐
+│                    Application Layer                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │   Motion     │  │  Monitoring  │  │     User     │      │
+│  │   Control    │  │   Analytics  │  │  Management  │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+│  ┌──────────────┐  ┌──────────────┐                         │
+│  │Communication │  │   Reports    │                         │
+│  └──────────────┘  └──────────────┘                         │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+┌─────────────────────┴───────────────────────────────────────┐
+│                     Data Layer                               │
+│  ┌──────────────┐  ┌──────────────┐                         │
+│  │   SQLite     │  │   MongoDB    │                         │
+│  │  (Primary)   │  │  (Optional)  │                         │
+│  └──────────────┘  └──────────────┘                         │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+┌─────────────────────┴───────────────────────────────────────┐
+│                    Hardware Layer                            │
+│  ┌──────────────┐  ┌──────────────┐                         │
+│  │ Serial Port  │  │  UDP Socket  │                         │
+│  │  (STM32)     │  │(Microcontrol)│                         │
+│  └──────────────┘  └──────────────┘                         │
+└─────────────────────────────────────────────────────────────┘
+```
 
-Motion Start & Stop
-    start_motion(profile_id): Start executing a predefined motion profile.
-    stop_motion(): Immediately stop all movements.
-Position Control (Joint & Cartesian)
-    move_to_position(joint_angles): Move to a specified set of joint angles.
-    move_to_cartesian(x, y, z, roll, pitch, yaw): Move to a target Cartesian position.
-    set_home_position(): Move the robot to the predefined home position.
-Speed & Acceleration Control
-    set_speed(speed_percentage): Adjust the robot's speed (0-100%).
-    set_acceleration(accel_percentage): Modify acceleration settings.
-Motion Profiles
-    create_motion_profile(name, waypoints): Define a new motion path.
-    get_motion_profiles(): Retrieve available motion profiles.
-    delete_motion_profile(profile_id): Remove a motion profile.
-Real-time Monitoring
-    get_robot_status(): Retrieve current axis positions and system status.
-    get_live_motion_data(): WebSocket-based live updates on movement.
-Safety & Emergency Controls
-    enable_safety_mode(): Activate safety restrictions.
-    disable_safety_mode(): Disable safety mode for advanced operations.
-    emergency_stop(): Immediately halt all robot movements.
-    Motion Control Enhancements
- Multiple Motion Profiles: Store and execute pre-programmed motion sequences.
- Inverse Kinematics (IK): Calculate joint angles for a given Cartesian position.
- Dynamic Path Planning: Implement trajectory smoothing with S-curve or trapezoidal motion profiles.
- Collision Detection: Add safety checks before executing a movement.
- Jog Control: Allow real-time manual movement of joints or end-effector.
- Multi-Robot Coordination: Sync multiple robots for cooperative tasks.
+### Communication Flow
 
-Real-Time Monitoring & WebSockets
- Live Robot State Updates: Display joint angles, velocity, and errors in real-time.
- WebSocket-Based Streaming: Use ROS → Django → React WebSocket for instant UI updates.
- Graphical Dashboard: Show charts for motor torques, speeds, and temperatures.
- ROS Diagnostic Logs: Stream system messages & alerts to the UI.
+1. **User Interface Layer**: React-based frontend with Three.js for 3D rendering
+2. **API Layer**: Django REST Framework endpoints for business logic
+3. **Real-time Layer**: Django Channels with WebSocket for live updates
+4. **Hardware Interface**: Serial and UDP protocols for microcontroller communication
+5. **Data Persistence**: SQLite for primary storage, MongoDB for optional analytics
 
-User Management & Authentication
- Role-Based Access Control (RBAC): Define roles (Admin, Operator, Observer).
- API Key & Token-Based Authentication: Secure API access for third-party integrations.
+## Technology Stack
 
-ROS Integration & Middleware
- ROS Service Calls: Expose services to start/stop motion, change speed, and update configurations.
- rosbridge_suite WebSocket: Enables direct ROS communication with React UI.
- ROS2 Support: Future-proof the system with ROS2 compatibility.
- Simulation Mode: Run the robot in a simulated environment (Gazebo, MoveIt!).
- EtherCAT Communication: Direct EtherCAT interface for real-time servo control.
+### Backend Technologies
 
-UI/UX Enhancements (React)
- 3D Robot Visualization: Use Three.js or ROS Rviz to display real-time robot movement.
- Drag-and-Drop Motion Planning: Let users create motion paths visually.
- Dark Mode UI Support: Improve user experience with modern theming.
+| Component | Technology | Version | Purpose |
+|-----------|-----------|---------|---------|
+| Framework | Django | 5.1.7 | Web application framework |
+| API | Django REST Framework | 3.14+ | RESTful API development |
+| ASGI Server | Daphne | 4.0+ | WebSocket and HTTP server |
+| WebSocket | Django Channels | 4.0+ | Real-time communication |
+| Database | SQLite | 3.x | Primary data storage |
+| Database (Optional) | MongoDB | 4.x+ | Analytics data storage |
+| Web Server | Gunicorn | 21.0+ | WSGI HTTP server |
+| Numerical Computing | NumPy | 1.20+ | Mathematical operations |
 
-Logging, Analytics & Reporting
- Error & Event Logging: Record system states for debugging & analysis.
- Motion History Tracking: Save all executed movements for later review.
- Energy Consumption Monitoring: Track robot power usage (useful for efficiency analysis).
- PDF & CSV Reports: Export system logs, motion data, and analytics.
+### Frontend Technologies
 
-Cloud & API Integrations
- Cloud Storage: Store motion profiles & robot configurations in AWS/GCP/Azure.
- Remote Control via Web: Enable robot operation from a web browser securely.
- Integration with MES/ERP: Connect to factory automation systems.
- MQTT & IoT Integration: Communicate with smart sensors & edge devices.
+| Component | Technology | Version | Purpose |
+|-----------|-----------|---------|---------|
+| Framework | React | 19.0 | UI component library |
+| Build Tool | Vite | 6.2 | Frontend build system |
+| 3D Rendering | Three.js | 0.169 | 3D graphics library |
+| 3D Framework | React Three Fiber | 9.1 | React renderer for Three.js |
+| 3D Utilities | Drei | 10.0 | Three.js helpers |
+| HTTP Client | Axios | 1.8 | API communication |
+| Routing | React Router | 7.4 | Client-side routing |
+| Charts | Recharts | 2.15 | Data visualization |
+| Styling | Tailwind CSS | 4.1 | Utility-first CSS |
+| Icons | Lucide React | 0.525 | Icon library |
+
+### Infrastructure
+
+- **Deployment Platform**: Render.com (configured for cloud deployment)
+- **Static File Serving**: WhiteNoise
+- **Environment Management**: python-decouple
+- **CORS Handling**: django-cors-headers
+
+## Prerequisites
+
+### System Requirements
+
+- **Operating System**: Windows 10/11, Linux (Ubuntu 20.04+), or macOS 11+
+- **Python**: 3.9 or higher
+- **Node.js**: 18.0 or higher
+- **npm**: 8.0 or higher
+- **RAM**: Minimum 4GB, recommended 8GB
+- **Storage**: Minimum 2GB free space
+
+### Hardware Requirements (Optional)
+
+- Serial port (COM/USB) for STM32 communication
+- Network interface for UDP communication
+- 6-axis robotic arm hardware (for physical deployment)
+
+### Development Tools
+
+- Git version control
+- Code editor (VS Code recommended)
+- Python virtual environment tool
+- Terminal/Command prompt access
+
+## Installation
+
+### Backend Setup
+
+1. **Clone the Repository**
+   ```bash
+   git clone <repository-url>
+   cd clo
+   ```
+
+2. **Create Virtual Environment**
+   ```bash
+   # Windows
+   python -m venv env
+   .\env\Scripts\activate
+
+   # Linux/macOS
+   python3 -m venv env
+   source env/bin/activate
+   ```
+
+3. **Install Dependencies**
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   ```
+
+4. **Database Migration**
+   ```bash
+   python manage.py migrate
+   ```
+
+5. **Create Superuser**
+   ```bash
+   python manage.py createsuperuser
+   ```
+
+6. **Start Development Server**
+   ```bash
+   # For HTTP-only development
+   python manage.py runserver
+
+   # For WebSocket support
+   daphne -b 127.0.0.1 -p 8000 robotics.asgi:application
+   ```
+
+### Frontend Setup
+
+1. **Navigate to Frontend Directory**
+   ```bash
+   cd frontend
+   ```
+
+2. **Install Dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Start Development Server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Access Application**
+   - Frontend: http://localhost:5173
+   - Backend API: http://localhost:8000
+   - Admin Panel: http://localhost:8000/admin
+
+## Configuration
+
+### Environment Variables
+
+Create a `.env` file in the `backend` directory:
+
+```env
+# Django Configuration
+SECRET_KEY=your-secret-key-here
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1,.onrender.com
+
+# Database Configuration (Optional MongoDB)
+MONGO_DB_USERNAME=your-mongodb-username
+MONGO_DB_PASSWORD=your-mongodb-password
+
+# Authentication
+LOG_USERNAME=admin_logs
+LOG_PASSWORD=your-secure-password
+
+# CORS Configuration
+CORS_ALLOWED_ORIGINS=http://localhost:5173,https://your-frontend-domain.com
+```
+
+### Frontend Configuration
+
+Create a `.env` file in the `frontend` directory:
+
+```env
+VITE_API_URL=http://localhost:8000
+VITE_WS_URL=ws://localhost:8000
+```
+
+### Serial Port Configuration
+
+Update the serial port settings in `backend/communication/consumers.py`:
+
+```python
+# Windows
+self.port_name = "COM4"
+
+# Linux
+self.port_name = "/dev/ttyUSB0"
+
+# Baudrate
+baudrate=115200
+```
+
+### UDP Configuration
+
+Update UDP settings in `backend/motion_control/views.py`:
+
+```python
+UDP_HOST = "127.0.0.1"
+UDP_PORT = 12345
+```
+
+## API Documentation
+
+### Authentication Endpoints
+
+#### Login
+```http
+POST /api/auth/login/
+Content-Type: application/json
+
+{
+  "username": "user",
+  "password": "password"
+}
+```
+
+### Motion Control Endpoints
+
+#### Inverse Kinematics
+```http
+POST /api/motion/ik/
+Content-Type: application/json
+
+{
+  "x": 300.0,
+  "y": 0.0,
+  "z": 400.0,
+  "rx": 0.0,
+  "ry": 0.0,
+  "rz": 0.0
+}
+```
+
+#### Motion Profiles
+```http
+GET /api/motion/profile/{profile_name}/?total_time=4&steps=20&max_vel=40&max_accel=10
+```
+
+Supported profiles:
+- `default`: Linear velocity profile
+- `triangular`: Triangular velocity profile
+- `trapezoidal`: Trapezoidal acceleration profile
+- `s_curve`: S-curve (jerk-limited) profile
+
+### Monitoring Endpoints
+
+#### Robot Logs
+```http
+GET /api/monitoring/logs/
+```
+
+#### System Events
+```http
+GET /api/monitoring/events/
+```
+
+#### Hardware Feedback
+```http
+GET /api/monitoring/feedback/hardware/
+```
+
+#### Software Feedback
+```http
+GET /api/monitoring/feedback/software/
+```
+
+### WebSocket Endpoints
+
+#### Robot Control WebSocket
+```javascript
+ws://localhost:8000/ws/robot/
+```
+
+Send messages:
+```json
+{
+  "type": "command",
+  "data": {
+    "joint": 1,
+    "angle": 45.0
+  }
+}
+```
+
+## Project Structure
+
+```
+6-axis/
+├── backend/
+│   ├── communication/          # WebSocket and serial communication
+│   │   ├── consumers.py        # WebSocket consumers
+│   │   ├── routing.py          # WebSocket routing
+│   │   └── ...
+│   ├── monitoring/             # Data logging and analytics
+│   │   ├── models.py           # Database models
+│   │   ├── views.py            # API views
+│   │   ├── analytics.py        # Analytics engine
+│   │   └── ...
+│   ├── motion_control/         # Motion planning and kinematics
+│   │   ├── views.py            # Motion control API
+│   │   ├── collision_detection.py
+│   │   ├── motion_planner.py
+│   │   └── ...
+│   ├── reports/                # Report generation
+│   │   ├── pdf_generator.py
+│   │   ├── csv_export.py
+│   │   └── ...
+│   ├── user_management/        # Authentication and authorization
+│   │   ├── models.py
+│   │   ├── views.py
+│   │   └── ...
+│   ├── udp_communication/      # UDP protocol implementation
+│   │   ├── udp_receiver.py
+│   │   └── README.md
+│   ├── robotics/               # Django project settings
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   ├── asgi.py
+│   │   └── wsgi.py
+│   ├── manage.py
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── components/         # React components
+│   │   ├── pages/              # Page components
+│   │   ├── r3f/                # React Three Fiber components
+│   │   ├── context/            # React context providers
+│   │   ├── hooks/              # Custom React hooks
+│   │   ├── utils/              # Utility functions
+│   │   ├── App.jsx             # Main application component
+│   │   ├── Routes.jsx          # Route definitions
+│   │   └── main.jsx            # Application entry point
+│   ├── public/                 # Static assets
+│   ├── package.json
+│   ├── vite.config.js
+│   └── tailwind.config.js
+├── env/                        # Python virtual environment
+├── render.yaml                 # Render.com deployment config
+└── README.md
+```
+
+## Development
+
+### Running Tests
+
+#### Backend Tests
+```bash
+cd backend
+python manage.py test
+```
+
+#### Frontend Tests
+```bash
+cd frontend
+npm run lint
+```
+
+### Code Style Guidelines
+
+#### Python (Backend)
+- Follow PEP 8 style guide
+- Use type hints where applicable
+- Document all public functions and classes
+- Maximum line length: 120 characters
+
+#### JavaScript/React (Frontend)
+- Follow ESLint configuration
+- Use functional components with hooks
+- Implement proper prop validation
+- Use meaningful variable and function names
+
+### Database Management
+
+#### Create Migration
+```bash
+python manage.py makemigrations
+```
+
+#### Apply Migration
+```bash
+python manage.py migrate
+```
+
+#### Database Shell
+```bash
+python manage.py dbshell
+```
+
+### Adding New Features
+
+1. Create feature branch from main
+2. Implement changes with appropriate tests
+3. Update documentation
+4. Submit pull request with detailed description
+5. Address code review feedback
+
+## Deployment
+
+### Production Deployment (Render.com)
+
+The application includes a `render.yaml` configuration for automated deployment:
+
+1. **Push to Repository**
+   ```bash
+   git push origin main
+   ```
+
+2. **Render.com Auto-Deploy**
+   - Backend: Automatically deploys using Daphne ASGI server
+   - Frontend: Builds and deploys static site
+
+3. **Environment Configuration**
+   - Set production environment variables in Render dashboard
+   - Configure custom domain (optional)
+   - Enable automatic deployments
+
+### Manual Production Deployment
+
+#### Backend
+```bash
+# Collect static files
+python manage.py collectstatic --noinput
+
+# Start production server
+daphne -b 0.0.0.0 -p 8000 robotics.asgi:application
+```
+
+#### Frontend
+```bash
+# Build production bundle
+npm run build
+
+# Serve with static server
+npm run preview
+```
+
+### Database Backup
+
+```bash
+# SQLite backup
+python manage.py dumpdata > backup.json
+
+# Restore
+python manage.py loaddata backup.json
+```
+
+## Security Considerations
+
+### Authentication & Authorization
+
+- Implement JWT tokens for API authentication
+- Use HTTPS in production environments
+- Configure CORS policies appropriately
+- Implement rate limiting on API endpoints
+- Regular security audits of dependencies
+
+### Data Protection
+
+- Encrypt sensitive data at rest
+- Use environment variables for credentials
+- Implement database backup strategies
+- Regular security updates and patches
+- Audit logging for critical operations
+
+### Production Security Checklist
+
+- [ ] Set `DEBUG=False` in production
+- [ ] Use strong `SECRET_KEY`
+- [ ] Configure proper `ALLOWED_HOSTS`
+- [ ] Enable HTTPS/SSL certificates
+- [ ] Implement CSRF protection
+- [ ] Configure secure session cookies
+- [ ] Set up firewall rules
+- [ ] Regular dependency updates
+- [ ] Implement monitoring and alerting
+
+## Troubleshooting
+
+### Common Issues
+
+#### Backend Won't Start
+
+**Issue**: Django server fails to start
+```
+Solution:
+1. Check virtual environment activation
+2. Verify all dependencies installed: pip install -r requirements.txt
+3. Check for port conflicts: netstat -an | findstr :8000
+4. Review error logs in console output
+```
+
+#### Frontend Build Errors
+
+**Issue**: Vite build fails
+```
+Solution:
+1. Delete node_modules: rm -rf node_modules
+2. Clear npm cache: npm cache clean --force
+3. Reinstall: npm install
+4. Check Node.js version compatibility
+```
+
+#### Serial Port Connection Issues
+
+**Issue**: Cannot connect to STM32
+```
+Solution:
+1. Verify correct COM port in consumers.py
+2. Check device drivers installed
+3. Ensure port not in use by other applications
+4. Verify baud rate settings (115200)
+5. Check physical cable connection
+```
+
+#### WebSocket Connection Failed
+
+**Issue**: Real-time updates not working
+```
+Solution:
+1. Verify Daphne server running (not runserver)
+2. Check WebSocket URL configuration
+3. Verify CORS settings for WebSocket
+4. Check browser console for connection errors
+5. Ensure firewall allows WebSocket connections
+```
+
+#### Database Migration Errors
+
+**Issue**: Migration conflicts
+```
+Solution:
+1. Delete migration files (keep __init__.py)
+2. Remove db.sqlite3
+3. Run: python manage.py makemigrations
+4. Run: python manage.py migrate
+```
+
+### Logging
+
+Enable detailed logging in `settings.py`:
+
+```python
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+```
+
+### Performance Optimization
+
+- Enable database query optimization
+- Implement caching strategies (Redis)
+- Optimize WebSocket message frequency
+- Compress static assets
+- Use CDN for frontend delivery
+- Implement database indexing
+- Monitor memory usage and optimize
+
+## Maintenance
+
+### Regular Maintenance Tasks
+
+#### Daily
+- Monitor system logs for errors
+- Check disk space usage
+- Verify backup completion
+
+#### Weekly
+- Review security alerts
+- Update dependencies (minor versions)
+- Check database performance
+- Review user feedback
+
+#### Monthly
+- Security audit and updates
+- Database optimization
+- Performance testing
+- Backup verification
+- Documentation updates
+
+### Dependency Updates
+
+```bash
+# Backend
+pip list --outdated
+pip install --upgrade package-name
+
+# Frontend
+npm outdated
+npm update
+```
+
+### Monitoring
+
+Implement monitoring solutions:
+- Application performance monitoring (APM)
+- Error tracking (Sentry)
+- Log aggregation (ELK stack)
+- Uptime monitoring
+- Database performance monitoring
 
 
+---
 
+**Version**: 1.0.0  
